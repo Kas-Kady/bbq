@@ -7,15 +7,25 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum ROLE {
+  ADMIN
+  USER
+}
+
 model User {
   id    String @id @default(cuid())
   email String @unique
+  name  String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   password Password?
-  notes    Note[]
+
+  attended Attendee[]
+  upgrades Upgrade[]
+
+  role ROLE @default(USER)
 }
 
 model Password {
@@ -25,14 +35,43 @@ model Password {
   userId String @unique
 }
 
-model Note {
-  id    String @id @default(cuid())
-  title String
-  body  String
+model BBQ {
+  id          String @id @default(cuid())
+  title       String
+  description String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  attendees Attendee[]
+  upgrades  Upgrade[]
+}
+
+model Attendee {
+  id String @id @default(cuid())
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId String
+  bbq    BBQ    @relation(fields: [bbqId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  bbqId  String
+
+  brings String[]
+}
+
+model Upgrade {
+  id String @id @default(cuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String
+  bbq    BBQ    @relation(fields: [bbqId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  bbqId  String
+
+  description String
+  amount      Int
 }

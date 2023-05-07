@@ -4,40 +4,54 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function seed() {
-  const email = "rachel@remix.run";
-
-  // cleanup the existing database
-  await prisma.user.delete({ where: { email } }).catch(() => {
-    // no worries if it doesn't exist yet
-  });
-
-  const hashedPassword = await bcrypt.hash("racheliscool", 10);
-
-  const user = await prisma.user.create({
+  const lody = await prisma.user.create({
     data: {
-      email,
+      email: 'hi@lodybo.nl',
+      name: 'Lody',
+      role: 'ADMIN',
       password: {
         create: {
-          hash: hashedPassword,
-        },
-      },
-    },
+          hash: await bcrypt.hash('lodyiscool', 10),
+        }
+      }
+    }
   });
 
-  await prisma.note.create({
+  const kaylee = await prisma.user.create({
     data: {
-      title: "My first note",
-      body: "Hello, world!",
-      userId: user.id,
-    },
+      email: 'kaylee@drakenfruit.nl',
+      name: 'Kaylee',
+      role: 'ADMIN',
+      password: {
+        create: {
+          hash: await bcrypt.hash('kayleeiscool', 10),
+        }
+      }
+    }
   });
 
-  await prisma.note.create({
+  const daan = await prisma.user.create({
     data: {
-      title: "My second note",
-      body: "Hello, world!",
-      userId: user.id,
-    },
+      email: 'daan@chello.nl',
+      name: 'Daan',
+      password: {
+        create: {
+          hash: await bcrypt.hash('daaniscool', 10),
+        }
+      }
+    }
+  });
+
+  const eva = await prisma.user.create({
+    data: {
+      email: 'eva@chello.nl',
+      name: 'Eva',
+      password: {
+        create: {
+          hash: await bcrypt.hash('evaiscool', 10),
+        }
+      }
+    }
   });
 
   console.log(`Database has been seeded. 🌱`);
