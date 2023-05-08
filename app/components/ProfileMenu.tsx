@@ -1,0 +1,45 @@
+import { Link } from '@remix-run/react';
+import type { User } from '@prisma/client';
+import { useMatchesData } from '~/utils';
+import { ROLE } from '@prisma/client';
+
+export default function ProfileMenu() {
+  const { user } = useMatchesData('root') as { user: User };
+
+  return (
+    <nav className="flex h-full w-1/4 flex-col bg-primary-light px-10 py-20">
+      <h2 className="font-handwriting text-5xl">Menu</h2>
+
+      <ul className="mb-10 mt-5 space-y-5">
+        <li>
+          <Link to="/profile/bbqs" className="text-2xl">
+            BBQ's
+          </Link>
+        </li>
+        <li>
+          <Link to="/profile/settings" className="text-2xl">
+            Instellingen
+          </Link>
+        </li>
+      </ul>
+
+      {user.role === ROLE.ADMIN ? (
+        <>
+          <h2 className="font-handwriting text-4xl">Admins</h2>
+          <ul className="mb-10 mt-5 space-y-5">
+            <li>
+              <Link to="/bbq/new" className="text-2xl">
+                Nieuwe BBQ aanmaken
+              </Link>
+            </li>
+            <li>
+              <Link to="/admin/register" className="text-2xl">
+                Nieuwe gebruiker toevoegen
+              </Link>
+            </li>
+          </ul>
+        </>
+      ) : null}
+    </nav>
+  );
+}

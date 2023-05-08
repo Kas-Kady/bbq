@@ -6,7 +6,6 @@ import {
   Scripts,
   ScrollRestoration,
 } from '@remix-run/react';
-import Navigation from '~/components/Navigation';
 
 type Props = {
   children: ReactNode;
@@ -22,7 +21,6 @@ export function Document({ children }: Props) {
         <Links />
       </head>
       <body className="h-full font-sans">
-        <Navigation />
         {children}
         <ScrollRestoration />
         <Scripts />
