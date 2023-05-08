@@ -10,18 +10,23 @@ type Props = JSX.IntrinsicElements['button'] & {
   size?: 'small' | 'normal';
 };
 
-const variantStyles = new Map();
-variantStyles.set('normal', 'bg-zinc-200 hover:bg-zinc-300');
-variantStyles.set('primary', 'bg-cyan-200 hover:bg-cyan-400');
-variantStyles.set('success', 'bg-zinc-200 hover:bg-emerald-300');
-
-const sizes = new Map();
-sizes.set('small', 'px-4 py-2');
-sizes.set('normal', 'px-8 py-4');
-
-export default function Button({ className = '', children, variant = 'normal', size = 'normal' }: Props) {
+export default function Button({
+  className = '',
+  children,
+  variant = 'normal',
+  size = 'normal',
+}: Props) {
   return (
-    <button className={ `${className} ${ variantStyles.get(variant) } ${ sizes.get(size) } text-slate-800 transition hover:text-slate-50 focus:outline-none focus-visible:ring focus-visible:ring-primary focus-visible:ring-offset-2` }>
+    <button
+      className={` ${className} transition focus:outline-none focus-visible:ring focus-visible:ring-primary focus-visible:ring-offset-2 ${
+        variant === 'normal'
+          ? 'bg-zinc-200 text-slate-800 hover:bg-zinc-300'
+          : variant === 'primary'
+          ? 'bg-cyan-200 text-cyan-900 hover:bg-cyan-400'
+          : 'bg-zinc-200 text-slate-800 hover:bg-emerald-300 hover:text-emerald-900'
+      }
+        ${size === 'small' ? 'px-4 py-2' : 'px-8 py-4'}`}
+    >
       {children}
     </button>
   );

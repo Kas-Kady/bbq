@@ -1,68 +1,83 @@
-import type { ActionArgs, LoaderArgs, V2_MetaFunction } from "@remix-run/node";
-import { json, redirect } from "@remix-run/node";
-import { Form, Link, useActionData, useSearchParams } from "@remix-run/react";
-import { useEffect, useRef } from "react";
+import type { ActionArgs, LoaderArgs, V2_MetaFunction } from '@remix-run/node';
+import { json, redirect } from '@remix-run/node';
+import { Form, useActionData } from '@remix-run/react';
+import { useEffect, useRef } from 'react';
 
-import { verifyLogin } from "~/models/user.server";
-import { createUserSession, getUserId } from "~/session.server";
-import { safeRedirect, validateEmail } from "~/utils";
+import { verifyLogin } from '~/models/user.server';
+import { createUserSession, getUser } from '~/session.server';
+
+import EmailInput from '~/components/EmailInput';
+import PasswordInput from '~/components/PasswordInput';
+import Button from '~/components/Button';
+import { validateEmail } from '~/validations/email';
+import { checkPasswordLength, validatePassword } from '~/validations/password';
+import invariant from 'tiny-invariant';
+
+type LoginActionData = {
+  errors?: {
+    email?: string;
+    password?: string;
+    loginFailed?: boolean;
+  };
+};
 
 export const loader = async ({ request }: LoaderArgs) => {
-  const userId = await getUserId(request);
-  if (userId) return redirect("/");
+  const user = await getUser(request);
+
+  if (user) {
+    return redirect('/profile');
+  }
+
   return json({});
 };
 
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
-  const email = formData.get("email");
-  const password = formData.get("password");
-  const redirectTo = safeRedirect(formData.get("redirectTo"), "/");
-  const remember = formData.get("remember");
+  const email = formData.get('email');
+  const password = formData.get('password');
+  const remember = formData.get('remember');
+
+  const errors: LoginActionData['errors'] = {};
 
   if (!validateEmail(email)) {
-    return json(
-      { errors: { email: "Email is invalid", password: null } },
-      { status: 400 }
-    );
+    errors.email = 'E-mailadres is ongeldig';
   }
 
-  if (typeof password !== "string" || password.length === 0) {
-    return json(
-      { errors: { email: null, password: "Password is required" } },
-      { status: 400 }
-    );
+  if (!validatePassword(password)) {
+    errors.password = 'Wachtwoord is verplicht';
   }
 
-  if (password.length < 8) {
-    return json(
-      { errors: { email: null, password: "Password is too short" } },
-      { status: 400 }
-    );
+  if (!checkPasswordLength(password as string)) {
+    errors.password = 'Wachtwoord is te kort';
   }
+
+  if (Object.keys(errors).length > 0) {
+    return json<LoginActionData>({ errors }, { status: 400 });
+  }
+
+  invariant(typeof email === 'string', 'Email is not a string');
+  invariant(typeof password === 'string', 'Password is not a string');
 
   const user = await verifyLogin(email, password);
 
   if (!user) {
-    return json(
-      { errors: { email: "Invalid email or password", password: null } },
-      { status: 400 }
+    return json<LoginActionData>(
+      { errors: { loginFailed: true } },
+      { status: 401 }
     );
   }
 
   return createUserSession({
-    redirectTo,
-    remember: remember === "on" ? true : false,
+    redirectTo: '/profile',
+    remember: remember === 'on',
     request,
     userId: user.id,
   });
 };
 
-export const meta: V2_MetaFunction = () => [{ title: "Login" }];
+export const meta: V2_MetaFunction = () => [{ title: 'Login' }];
 
 export default function LoginPage() {
-  const [searchParams] = useSearchParams();
-  const redirectTo = searchParams.get("redirectTo") || "/notes";
   const actionData = useActionData<typeof action>();
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
@@ -84,16 +99,15 @@ export default function LoginPage() {
               htmlFor="email"
               className="block text-sm font-medium text-gray-700"
             >
-              Email address
+              E-mailadres
             </label>
             <div className="mt-1">
-              <input
+              <EmailInput
                 ref={emailRef}
                 id="email"
                 required
                 autoFocus={true}
                 name="email"
-                type="email"
                 autoComplete="email"
                 aria-invalid={actionData?.errors?.email ? true : undefined}
                 aria-describedby="email-error"
@@ -112,14 +126,13 @@ export default function LoginPage() {
               htmlFor="password"
               className="block text-sm font-medium text-gray-700"
             >
-              Password
+              Wachtwoord
             </label>
             <div className="mt-1">
-              <input
+              <PasswordInput
                 id="password"
                 ref={passwordRef}
                 name="password"
-                type="password"
                 autoComplete="current-password"
                 aria-invalid={actionData?.errors?.password ? true : undefined}
                 aria-describedby="password-error"
@@ -133,13 +146,9 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <input type="hidden" name="redirectTo" value={redirectTo} />
-          <button
-            type="submit"
-            className="w-full rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:bg-blue-400"
-          >
-            Log in
-          </button>
+          <Button className="w-full" type="submit" variant="primary">
+            Inloggen
+          </Button>
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <input
@@ -152,20 +161,8 @@ export default function LoginPage() {
                 htmlFor="remember"
                 className="ml-2 block text-sm text-gray-900"
               >
-                Remember me
+                Onthoud mij
               </label>
-            </div>
-            <div className="text-center text-sm text-gray-500">
-              Don't have an account?{" "}
-              <Link
-                className="text-blue-500 underline"
-                to={{
-                  pathname: "/join",
-                  search: searchParams.toString(),
-                }}
-              >
-                Sign up
-              </Link>
             </div>
           </div>
         </Form>
