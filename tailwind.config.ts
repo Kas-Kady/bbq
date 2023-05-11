@@ -17,8 +17,10 @@ module.exports = {
           DEFAULT: colors.rose['100'],
           dark: colors.rose['200'],
         },
-        white: colors.stone['50'],
-        black: colors.stone['800'],
+        light: colors.stone['50'],
+        dark: colors.stone['800'],
+        white: colors.white,
+        black: colors.black,
       },
       spacing: {
         'grow-x': 'clamp(1rem, 3vw, 2.5rem);',

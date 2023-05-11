@@ -3,17 +3,27 @@ import type { ReactNode } from 'react';
 type Props = {
   label: string;
   children: ReactNode;
-  flex?: boolean;
+  stacked?: boolean;
+  textAlignment?: 'text-left' | 'text-center' | 'text-right';
+  className?: string;
 };
 
-export default function Label({ label, children, flex = false }: Props) {
+export default function Label({
+  label,
+  children,
+  stacked = true,
+  textAlignment = 'text-left',
+  className = '',
+}: Props) {
   return (
     <label
-      className={`mb-5 w-full ${
-        flex ? 'flex flex-col items-center gap-2 sm:flex-row' : ''
-      }`}
+      className={`flex w-full items-start gap-2 ${
+        stacked ? 'flex-col' : 'flex-col sm:flex-row'
+      } ${className}`}
     >
-      <p className={`text-center ${flex ? 'mb-0 flex-1' : 'mb-2'}`}>{label}</p>
+      <p className={`${textAlignment} ${stacked ? 'mb-0 flex-1' : 'mb-2'}`}>
+        {label}
+      </p>
       {children}
     </label>
   );

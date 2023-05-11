@@ -1,41 +1,56 @@
-import React from 'react';
 import type { IconName, IconPrefix } from '@fortawesome/fontawesome-svg-core';
+import { icon, library } from '@fortawesome/fontawesome-svg-core';
 import {
-  icon as fontAwesomeIcon,
-  toHtml,
-} from '@fortawesome/fontawesome-svg-core';
+  faCheck,
+  faFileLines,
+  faTrashAlt,
+  faStroopwafel,
+  faChevronUp,
+  faChevronDown,
+} from '@fortawesome/free-solid-svg-icons';
+import {
+  faCircleXmark,
+  faPenToSquare,
+} from '@fortawesome/free-regular-svg-icons';
 
-export type Props = {
+library.add(
+  faCheck,
+  faFileLines,
+  faTrashAlt,
+  faStroopwafel,
+  faCircleXmark,
+  faPenToSquare,
+  faChevronUp,
+  faChevronDown,
+);
+
+type Props = {
   name: IconName;
-  className?: React.HTMLAttributes<HTMLSpanElement>['className'];
-  prefix?: Extract<IconPrefix, 'fas' | 'fab' | 'far'>;
-  sizes?: 's' | 'm' | 'l' | 'xl' | 'full';
+  prefix?: IconPrefix;
+  spin?: boolean;
 };
 
-const sizeMap = new Map<Props['sizes'], string>();
-sizeMap.set('s', 'fa-xs');
-sizeMap.set('m', ''); // Default font-size
-sizeMap.set('l', 'fa-2x');
-sizeMap.set('xl', 'fa-3x');
-sizeMap.set('full', 'fa-5x');
+const Icon = ({ name, prefix = 'fas', spin = false }: Props) => {
+  const classes = [];
 
-const Icon = ({ name, prefix = 'fas', className = '', sizes = 'm' }: Props) => {
-  const icon = fontAwesomeIcon(
+  if (spin) {
+    classes.push('fa-spin');
+  }
+
+  const iconHTML = icon(
     {
       prefix,
       iconName: name,
     },
     {
-      classes: [sizeMap.get(sizes) || ''],
-    }
-  ).abstract.shift();
+      classes,
+      styles: {
+        height: '1em',
+      },
+    },
+  ).html;
 
-  return (
-    <span
-      className={className}
-      dangerouslySetInnerHTML={{ __html: toHtml(icon) }}
-    />
-  );
+  return <span dangerouslySetInnerHTML={{ __html: iconHTML[0] }} />;
 };
 
 export default Icon;

@@ -14,7 +14,7 @@ const DEFAULT_REDIRECT = '/';
  */
 export function safeRedirect(
   to: FormDataEntryValue | string | null | undefined,
-  defaultRedirect: string = DEFAULT_REDIRECT
+  defaultRedirect: string = DEFAULT_REDIRECT,
 ) {
   if (!to || typeof to !== 'string') {
     return defaultRedirect;
@@ -34,12 +34,12 @@ export function safeRedirect(
  * @returns {JSON|undefined} The router data or undefined if not found
  */
 export function useMatchesData(
-  id: string
+  id: string,
 ): Record<string, unknown> | undefined {
   const matchingRoutes = useMatches();
   const route = useMemo(
     () => matchingRoutes.find((route) => route.id === id),
-    [matchingRoutes, id]
+    [matchingRoutes, id],
   );
   return route?.data;
 }
@@ -60,8 +60,63 @@ export function useUser(): User {
   const maybeUser = useOptionalUser();
   if (!maybeUser) {
     throw new Error(
-      'No user found in root loader, but user is required by useUser. If user is optional, try useOptionalUser instead.'
+      'No user found in root loader, but user is required by useUser. If user is optional, try useOptionalUser instead.',
     );
   }
   return maybeUser;
+}
+
+export function formatDateParts(date: Date) {
+  const formatter = new Intl.DateTimeFormat('nl-NL', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+  const [
+    { value: day },
+    ,
+    { value: month },
+    ,
+    { value: year },
+    ,
+    { value: hour },
+    ,
+    { value: minute },
+  ] = formatter.formatToParts(date);
+
+  return { day, month, year, hour, minute };
+}
+
+export function constructDate({
+  day,
+  month,
+  year,
+  hour,
+  minute,
+}: {
+  day: string;
+  month: string;
+  year: string;
+  hour: string;
+  minute: string;
+}): string {
+  // month is 1-indexed, so we need to subtract 1
+  const date = new Date(
+    parseInt(year, 10),
+    parseInt(month, 10) - 1,
+    parseInt(day, 10),
+    parseInt(hour, 10),
+    parseInt(minute, 10),
+  );
+
+  if (isNaN(date.getTime())) {
+    throw new Error(
+      `Invalid date for values ${day}, ${month}, ${year}, ${hour}, ${minute}`,
+    );
+  }
+
+  return date.toISOString();
 }
