@@ -49,11 +49,11 @@ export default function DateTimeField({ name, defaultValue }: Props) {
   }
 
   return (
-    <div className="flex flex-1 flex-row gap-5">
+    <div className="flex flex-1 flex-col gap-5 lg:flex-row">
       <input type="hidden" name={name} value={date} />
 
       <div className="flex flex-row gap-5">
-        <Label className="text-gray-500" label="Dag">
+        <Label className="flex-none text-gray-500" label="Dag" width="w-auto">
           <Select
             value={dayValue}
             onValueChange={(value) => setDayValue(value)}
@@ -66,8 +66,9 @@ export default function DateTimeField({ name, defaultValue }: Props) {
           </Select>
         </Label>
 
-        <Label className="text-gray-500" label="Maand">
+        <Label className="flex-none text-gray-500" width="w-auto" label="Maand">
           <Select
+            className="w-full flex-none lg:w-40"
             value={monthValue}
             onValueChange={(value) => setMonthValue(value)}
           >
@@ -79,18 +80,18 @@ export default function DateTimeField({ name, defaultValue }: Props) {
           </Select>
         </Label>
 
-        <Label className="text-gray-500" label="Jaar">
+        <Label className="text-gray-500" width="w-24" label="Jaar">
           <NumberInput
             name="year"
-            className="form-input appearance-none text-xl"
+            className="form-input flex-none appearance-none text-xl"
             value={yearValue}
             onChange={(event) => setYearValue(event.target.value)}
           />
         </Label>
       </div>
 
-      <div className="flex w-48 flex-row items-end gap-3">
-        <Label className="text-gray-500" label="Tijd">
+      <div className="flex flex-row items-end gap-3">
+        <Label className="text-gray-500" width="w-14" label="Tijd">
           <NumberInput
             name="hour"
             className="form-input appearance-none text-xl"
@@ -101,7 +102,7 @@ export default function DateTimeField({ name, defaultValue }: Props) {
 
         <p className="mb-1 text-3xl text-gray-500">:</p>
 
-        <Label className="text-gray-500" label="">
+        <Label className="text-gray-500" width="w-14" label="">
           <NumberInput
             name="minute"
             className="form-input appearance-none text-xl"

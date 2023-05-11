@@ -13,7 +13,7 @@ export const Select = React.forwardRef<HTMLButtonElement, Props>(
     return (
       <SelectPrimitive.Root {...props}>
         <SelectPrimitive.Trigger
-          className={`${className} form-input inline-flex w-full justify-between text-xl focus:outline-none focus-visible:ring focus-visible:ring-primary focus-visible:ring-offset-2`}
+          className={`${className} form-input inline-flex w-full justify-between gap-5 px-5 text-xl focus:outline-none focus-visible:ring focus-visible:ring-primary focus-visible:ring-offset-2`}
           ref={forwardedRef}
         >
           <SelectPrimitive.Value />

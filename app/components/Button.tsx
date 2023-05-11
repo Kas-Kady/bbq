@@ -13,6 +13,8 @@ type Props = JSX.IntrinsicElements['button'] & {
 export default function Button({
   className = '',
   children,
+  onClick,
+  type = 'button',
   variant = 'normal',
   size = 'normal',
 }: Props) {
@@ -26,6 +28,8 @@ export default function Button({
           : 'bg-zinc-200 text-slate-800 hover:bg-emerald-300 hover:text-emerald-900'
       }
         ${size === 'small' ? 'px-4 py-2' : 'px-8 py-4'}`}
+      type={type}
+      onClick={onClick}
     >
       {children}
     </button>

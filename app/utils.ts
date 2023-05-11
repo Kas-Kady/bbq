@@ -103,10 +103,9 @@ export function constructDate({
   hour: string;
   minute: string;
 }): string {
-  // month is 1-indexed, so we need to subtract 1
   const date = new Date(
     parseInt(year, 10),
-    parseInt(month, 10) - 1,
+    parseInt(month, 10) - 1, // month is 1-indexed, so we need to subtract 1
     parseInt(day, 10),
     parseInt(hour, 10),
     parseInt(minute, 10),
@@ -119,4 +118,35 @@ export function constructDate({
   }
 
   return date.toISOString();
+}
+
+export function formatDateToLocale(date: Date | string) {
+  const options: Intl.DateTimeFormatOptions = {
+    day: '2-digit',
+    month: 'long',
+    hour: '2-digit',
+    minute: '2-digit',
+  };
+
+  let dateObj: Date;
+  if (typeof date === 'string') {
+    dateObj = new Date(date);
+  } else {
+    dateObj = date;
+  }
+
+  if (new Date().getFullYear() !== dateObj.getFullYear()) {
+    options.year = 'numeric';
+  }
+
+  return new Intl.DateTimeFormat('nl-NL', options).format(dateObj);
+}
+
+export function getErrorMessage(err: unknown) {
+  // https://kentcdodds.com/blog/get-a-catch-block-error-message-with-typescript
+  let message;
+  if (err instanceof Error) message = err.message;
+  else message = String(err);
+
+  return message;
 }
