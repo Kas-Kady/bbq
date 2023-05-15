@@ -69,14 +69,13 @@ export default function BBQRoute() {
             {bbq.upgrades.length > 0 ? (
               <>
                 <h2>Upgrades</h2>
-                <ul className="list-item list-inside">
+                <ul className="pl-2">
                   {bbq.upgrades.map((upgrade) => (
-                    <li
-                      className="flex flex-row justify-between gap-2"
-                      key={upgrade.id}
-                    >
-                      <p>{upgrade.description}</p>
-                      <p>{upgrade.amount}</p>
+                    <li className="list-item list-inside pl-0" key={upgrade.id}>
+                      <div className="flex flex-row justify-between gap-2">
+                        <span>{upgrade.description}</span>
+                        <span>{upgrade.amount}</span>
+                      </div>
                     </li>
                   ))}
                 </ul>

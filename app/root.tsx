@@ -74,13 +74,13 @@ export function ErrorBoundary() {
     <Document>
       <Navigation />
       <div className="flex h-full items-center justify-center">
-        <div className="space-y-4">
+        <div className="max-w-screen-xl space-y-4 p-8">
           <h1 className="font-handwriting text-7xl">Aiaiai...</h1>
           <p>
             Er is iets fout gegaan op deze pagina. Probeer het later nog eens of
             laat het ons even weten..
           </p>
-          <pre className="mt-10 w-full bg-black px-10 py-5 text-white">
+          <pre className="mt-10 w-full whitespace-pre-line bg-black px-10 py-5 text-white">
             {message}
           </pre>
         </div>

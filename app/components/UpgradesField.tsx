@@ -1,21 +1,24 @@
-import type { Upgrade } from '~/types/Upgrade';
+import { useState } from 'react';
 import TextInput from '~/components/TextInput';
 import type { LabelProps } from '~/components/Label';
 import Label from '~/components/Label';
 import NumberInput from '~/components/NumberInput';
 import Button from '~/components/Button';
-import { useState } from 'react';
 import Icon from '~/components/Icon';
+import type { Upgrade } from '~/models/bbq.server';
 
 type Props = {
   name: string;
-  upgrades?: Upgrade[];
+  initialUpgrades?: Upgrade[];
 };
 
-export default function Upgrades({ name }: Props) {
-  const [upgrades, setUpgrades] = useState<Upgrade[]>([]);
+export default function Upgrades({ name, initialUpgrades = [] }: Props) {
+  const [upgrades, setUpgrades] =
+    useState<Pick<Upgrade, 'description' | 'amount'>[]>(initialUpgrades);
 
-  const handleItemDelete = (upgrade: Upgrade) => {
+  const handleItemDelete = (
+    upgrade: Pick<Upgrade, 'description' | 'amount'>,
+  ) => {
     const index = upgrades.findIndex(
       (u) =>
         u.description === upgrade.description && u.amount === upgrade.amount,
@@ -45,7 +48,11 @@ export default function Upgrades({ name }: Props) {
   );
 }
 
-function UpgradeField({ onChange }: { onChange: (upgrade: Upgrade) => void }) {
+function UpgradeField({
+  onChange,
+}: {
+  onChange: (upgrade: Pick<Upgrade, 'description' | 'amount'>) => void;
+}) {
   const [description, setDescription] = useState<string>();
   const [amount, setAmount] = useState<number>();
 
@@ -99,8 +106,8 @@ function UpgradesTable({
   upgrades,
   onDeleteItem,
 }: {
-  upgrades: Upgrade[];
-  onDeleteItem: (upgrade: Upgrade) => void;
+  upgrades: Pick<Upgrade, 'description' | 'amount'>[];
+  onDeleteItem: (upgrade: Pick<Upgrade, 'description' | 'amount'>) => void;
 }) {
   return (
     <table className="w-full">
