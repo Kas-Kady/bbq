@@ -13,6 +13,7 @@ export function getBBQs() {
 export function getBBQ(slug: string) {
   return prisma.bBQ.findUnique({
     where: { slug },
+    include: { upgrades: true },
   });
 }
 
