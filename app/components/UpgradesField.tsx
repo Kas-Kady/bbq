@@ -9,7 +9,7 @@ import type { Upgrade } from '~/models/bbq.server';
 
 type Props = {
   name: string;
-  initialUpgrades?: Upgrade[];
+  initialUpgrades?: Pick<Upgrade, 'description' | 'amount'>[];
 };
 
 export default function Upgrades({ name, initialUpgrades = [] }: Props) {
