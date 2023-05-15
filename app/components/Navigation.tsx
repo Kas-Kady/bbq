@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Link, NavLink } from '@remix-run/react';
+import { Link, NavLink, useLocation } from '@remix-run/react';
 import { useMatchesData } from '~/utils';
 import type { User } from '@prisma/client';
 import Button from '~/components/Button';
@@ -7,6 +7,7 @@ import Button from '~/components/Button';
 export default function Navigation() {
   const data = useMatchesData('root') as { user: User | null } | null;
   const user = data?.user || null;
+  const location = useLocation();
 
   return (
     <nav className="mb-10 flex flex-row items-center justify-between border-b-2 border-b-cyan-500 px-10 py-5">
@@ -20,7 +21,13 @@ export default function Navigation() {
             <NavigationItem to="/profile">Profiel</NavigationItem>
             <LogoutItem />
           </>
-        ) : null}
+        ) : (
+          <>
+            <NavigationItem to={`/login?redirectTo=${location.pathname}`}>
+              Inloggen
+            </NavigationItem>
+          </>
+        )}
       </ul>
     </nav>
   );

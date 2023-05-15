@@ -1,14 +1,18 @@
 import type { LoaderArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import invariant from 'tiny-invariant';
-import { useLoaderData } from '@remix-run/react';
+import { Link, useLoaderData } from '@remix-run/react';
 import { getBBQ } from '~/models/bbq.server';
 import Navigation from '~/components/Navigation';
 import MainLayout from '~/layouts/Main';
 import { formatDateToLocale } from '~/utils';
 import Button from '~/components/Button';
+import { getUser } from '~/session.server';
+import { ROLE } from '@prisma/client';
+import Anchor from '~/components/Anchor';
 
-export async function loader({ params }: LoaderArgs) {
+export async function loader({ request, params }: LoaderArgs) {
+  const user = await getUser(request);
   const { slug } = params;
 
   invariant(slug !== undefined, 'Slug needs to be set');
@@ -17,11 +21,11 @@ export async function loader({ params }: LoaderArgs) {
 
   invariant(bbq !== null, 'No BBQ found.');
 
-  return json({ bbq });
+  return json({ user, bbq });
 }
 
 export default function BBQRoute() {
-  const { bbq } = useLoaderData<typeof loader>();
+  const { user, bbq } = useLoaderData<typeof loader>();
   const { title, description, date } = bbq;
 
   return (
@@ -51,10 +55,21 @@ export default function BBQRoute() {
           </div>
 
           <div className="w-full flex-none">
+            {user && user.role === ROLE.ADMIN ? (
+              <div className="flex flex-col gap-2 bg-secondary-dark p-10">
+                <h3 className="mt-0">Admin instellingen</h3>
+
+                <ul className="mb-0">
+                  <li className="marker:text-primary-light">
+                    <Link to={`/bbq/edit/${bbq.slug}`}>Bewerken</Link>
+                  </li>
+                </ul>
+              </div>
+            ) : null}
             {bbq.upgrades.length > 0 ? (
               <>
                 <h2>Upgrades</h2>
-                <ul className="list-item">
+                <ul className="list-item list-inside">
                   {bbq.upgrades.map((upgrade) => (
                     <li
                       className="flex flex-row justify-between gap-2"

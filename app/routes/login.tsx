@@ -1,6 +1,6 @@
 import type { ActionArgs, LoaderArgs, V2_MetaFunction } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
-import { Form, useActionData } from '@remix-run/react';
+import { Form, useActionData, useSearchParams } from '@remix-run/react';
 import { useEffect, useRef } from 'react';
 
 import { verifyLogin } from '~/models/user.server';
@@ -12,6 +12,7 @@ import Button from '~/components/Button';
 import { validateEmail } from '~/validations/email';
 import { checkPasswordLength, validatePassword } from '~/validations/password';
 import invariant from 'tiny-invariant';
+import { safeRedirect } from '~/utils';
 
 type LoginActionData = {
   errors?: {
@@ -36,6 +37,7 @@ export const action = async ({ request }: ActionArgs) => {
   const email = formData.get('email');
   const password = formData.get('password');
   const remember = formData.get('remember');
+  const redirectTo = safeRedirect(formData.get('redirectTo'), '/profile');
 
   const errors: LoginActionData['errors'] = {};
 
@@ -63,12 +65,12 @@ export const action = async ({ request }: ActionArgs) => {
   if (!user) {
     return json<LoginActionData>(
       { errors: { loginFailed: true } },
-      { status: 401 }
+      { status: 401 },
     );
   }
 
   return createUserSession({
-    redirectTo: '/profile',
+    redirectTo,
     remember: remember === 'on',
     request,
     userId: user.id,
@@ -78,6 +80,8 @@ export const action = async ({ request }: ActionArgs) => {
 export const meta: V2_MetaFunction = () => [{ title: 'Login' }];
 
 export default function LoginPage() {
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get('redirectTo') || '/notes';
   const actionData = useActionData<typeof action>();
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
@@ -146,6 +150,7 @@ export default function LoginPage() {
             </div>
           </div>
 
+          <input type="hidden" name="redirectTo" value={redirectTo} />
           <Button className="w-full" type="submit" variant="primary">
             Inloggen
           </Button>
