@@ -12,21 +12,29 @@ export async function action({ request }: ActionArgs) {
   const id = formData.get('id');
   const title = formData.get('title');
   const datetime = formData.get('datetime');
+  const proposedDates = formData.get('proposedDates');
   const description = formData.get('description');
   const stringifiedUpgrades = formData.get('upgrades');
 
   isDefined(title);
-  isDefined(datetime);
   isDefined(description);
   isDefined(stringifiedUpgrades);
 
   const upgrades = JSON.parse(stringifiedUpgrades) as Upgrade[];
-  const bbqDateTime = new Date(datetime);
   const slug = slugify(title);
 
-  if (isNaN(bbqDateTime.getTime())) {
-    throw new Error('Invalid datetime');
+  let bbqDateTime: Date | undefined;
+  let bbqProposedDates: string[] | undefined;
+
+  if (datetime !== null && typeof datetime === 'string') {
+    bbqDateTime = new Date(datetime);
   }
+
+  console.log('proposedDates', proposedDates);
+  if (proposedDates !== null && typeof proposedDates === 'string') {
+    bbqProposedDates = JSON.parse(proposedDates) as string[];
+  }
+  console.log('bbqProposedDates', bbqProposedDates);
 
   if (id !== null && typeof id !== 'undefined') {
     invariant(typeof id === 'string', 'id must be a string');
@@ -38,6 +46,7 @@ export async function action({ request }: ActionArgs) {
         title,
         description,
         datetime: bbqDateTime,
+        proposedDates: bbqProposedDates,
         upgrades,
       });
     } catch (err) {
@@ -51,6 +60,7 @@ export async function action({ request }: ActionArgs) {
         title,
         description,
         datetime: bbqDateTime,
+        proposedDates: bbqProposedDates,
         upgrades,
       });
     } catch (err) {

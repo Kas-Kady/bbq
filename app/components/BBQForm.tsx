@@ -6,6 +6,7 @@ import DateTimeField from '~/components/DateTimeField';
 import Editor from '~/components/Editor';
 import UpgradesField from '~/components/UpgradesField';
 import Button from '~/components/Button';
+import DatesPickerEntryField from '~/components/DatesPickerEntryField';
 
 type Props = {
   action: string;
@@ -46,10 +47,21 @@ export default function BBQForm({ action, bbq, upgrades }: Props) {
         </div>
       </div>
 
-      <div className="w-1/4 flex-none items-end">
-        <Button variant="primary" type="submit">
-          Opslaan
-        </Button>
+      <div className="flex w-full flex-none justify-between gap-20">
+        <div className="w-3/4">
+          <Label label="Datums">
+            <DatesPickerEntryField
+              name="proposedDates"
+              dates={bbq?.proposedDates}
+            />
+          </Label>
+        </div>
+
+        <div className="flex w-1/4 items-end justify-end">
+          <Button variant="primary" type="submit">
+            Opslaan
+          </Button>
+        </div>
       </div>
     </form>
   );

@@ -33,6 +33,7 @@ export async function loader({ request, params }: LoaderArgs) {
       title: bbq.title,
       description: bbq.description,
       date: bbq.date,
+      proposedDates: bbq.proposedDates,
       upgrades: bbq.upgrades,
     },
   });

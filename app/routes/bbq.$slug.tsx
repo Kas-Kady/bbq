@@ -5,7 +5,7 @@ import { Link, useLoaderData } from '@remix-run/react';
 import { getBBQ } from '~/models/bbq.server';
 import Navigation from '~/components/Navigation';
 import MainLayout from '~/layouts/Main';
-import { formatDateToLocale } from '~/utils';
+import { formatAmountToLocale, formatDateToLocale } from '~/utils';
 import Button from '~/components/Button';
 import { getUser } from '~/session.server';
 import { ROLE } from '@prisma/client';
@@ -50,13 +50,17 @@ export default function BBQRoute() {
         >
           <div className="w-full flex-none">
             <h1>{title}</h1>
-            <p>Wanneer: {formatDateToLocale(date)}</p>
+            {date ? <p>Wanneer: {formatDateToLocale(date)}</p> : null}
             <div dangerouslySetInnerHTML={{ __html: description }} />
           </div>
 
           <div className="w-full flex-none">
+            <Button className="w-full" variant="primary">
+              Inschrijven
+            </Button>
+
             {user && user.role === ROLE.ADMIN ? (
-              <div className="flex flex-col gap-2 bg-secondary-dark p-10">
+              <div className="mt-10 flex flex-col gap-2 bg-secondary-dark p-10">
                 <h3 className="mt-0">Admin instellingen</h3>
 
                 <ul className="mb-0">
@@ -66,6 +70,20 @@ export default function BBQRoute() {
                 </ul>
               </div>
             ) : null}
+            {!date && bbq.proposedDates.length > 0 ? (
+              <>
+                <h2>Voorgestelde data</h2>
+                <ul className="pl-2">
+                  {bbq.proposedDates.map((date) => (
+                    <li className="list-item list-inside pl-0" key={date}>
+                      <div className="flex flex-row justify-between gap-2">
+                        {formatDateToLocale(date)}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : null}
             {bbq.upgrades.length > 0 ? (
               <>
                 <h2>Upgrades</h2>
@@ -74,17 +92,13 @@ export default function BBQRoute() {
                     <li className="list-item list-inside pl-0" key={upgrade.id}>
                       <div className="flex flex-row justify-between gap-2">
                         <span>{upgrade.description}</span>
-                        <span>{upgrade.amount}</span>
+                        <span>{formatAmountToLocale(upgrade.amount)}</span>
                       </div>
                     </li>
                   ))}
                 </ul>
               </>
             ) : null}
-
-            <Button className="w-full" variant="primary">
-              Inschrijven
-            </Button>
           </div>
         </div>
       </MainLayout>

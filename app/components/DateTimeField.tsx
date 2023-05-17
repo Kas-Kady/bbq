@@ -2,12 +2,7 @@ import Label from '~/components/Label';
 import { Select, SelectItem } from '~/components/Select';
 import NumberInput from '~/components/NumberInput';
 import { constructDate, formatDateParts } from '~/utils';
-import { useState } from 'react';
-
-type Props = {
-  name: string;
-  defaultValue?: Date;
-};
+import { useEffect, useRef, useState } from 'react';
 
 const months = [
   { name: 'Januari', value: '01' },
@@ -24,8 +19,29 @@ const months = [
   { name: 'December', value: '12' },
 ];
 
-export default function DateTimeField({ name, defaultValue }: Props) {
-  const defaultDate = defaultValue || new Date();
+type BaseProps = {
+  name: string;
+};
+
+type ControlledProps = BaseProps & {
+  value?: Date;
+  onChange?: (value: Date) => void;
+  defaultValue?: never;
+};
+
+type UncontrolledProps = BaseProps & {
+  defaultValue?: Date;
+  onChange?: never;
+  value?: never;
+};
+
+type Props = ControlledProps | UncontrolledProps;
+
+export default function DateTimeField({ name, ...props }: Props) {
+  const { value, onChange } = props as ControlledProps;
+  const { defaultValue } = props as UncontrolledProps;
+
+  const defaultDate = defaultValue || value || new Date();
   const { day, month, year, hour, minute } = formatDateParts(defaultDate);
 
   const [dayValue, setDayValue] = useState(day);
@@ -33,8 +49,17 @@ export default function DateTimeField({ name, defaultValue }: Props) {
   const [yearValue, setYearValue] = useState(year);
   const [hourValue, setHourValue] = useState(hour);
   const [minuteValue, setMinuteValue] = useState(minute);
+  const changeCallbackShouldBeCalled = useRef(false);
 
   let date = defaultDate.toISOString();
+
+  const handleChange = (value: string, setter: (value: string) => void) => {
+    setter(value);
+
+    if (onChange) {
+      changeCallbackShouldBeCalled.current = true;
+    }
+  };
 
   try {
     date = constructDate({
@@ -48,15 +73,30 @@ export default function DateTimeField({ name, defaultValue }: Props) {
     console.error(error);
   }
 
+  useEffect(() => {
+    if (changeCallbackShouldBeCalled.current && onChange) {
+      onChange(
+        new Date(
+          parseInt(yearValue),
+          parseInt(monthValue) - 1,
+          parseInt(dayValue),
+          parseInt(hourValue),
+          parseInt(minuteValue),
+        ),
+      );
+      changeCallbackShouldBeCalled.current = false;
+    }
+  });
+
   return (
     <div className="flex flex-1 flex-col gap-5 lg:flex-row">
-      <input type="hidden" name={name} value={date} />
+      {defaultValue ? <input type="hidden" name={name} value={date} /> : null}
 
       <div className="flex flex-row gap-5">
         <Label className="flex-none text-gray-500" label="Dag" width="w-auto">
           <Select
             value={dayValue}
-            onValueChange={(value) => setDayValue(value)}
+            onValueChange={(value) => handleChange(value, setDayValue)}
           >
             {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
               <SelectItem key={day} value={day.toString()}>
@@ -70,7 +110,7 @@ export default function DateTimeField({ name, defaultValue }: Props) {
           <Select
             className="w-full flex-none lg:w-40"
             value={monthValue}
-            onValueChange={(value) => setMonthValue(value)}
+            onValueChange={(value) => handleChange(value, setMonthValue)}
           >
             {months.map((month) => (
               <SelectItem key={month.value} value={month.value}>
@@ -85,7 +125,7 @@ export default function DateTimeField({ name, defaultValue }: Props) {
             name="year"
             className="form-input flex-none appearance-none text-xl"
             value={yearValue}
-            onChange={(event) => setYearValue(event.target.value)}
+            onChange={(event) => handleChange(event.target.value, setYearValue)}
           />
         </Label>
       </div>
@@ -96,7 +136,7 @@ export default function DateTimeField({ name, defaultValue }: Props) {
             name="hour"
             className="form-input appearance-none text-xl"
             value={hourValue}
-            onChange={(event) => setHourValue(event.target.value)}
+            onChange={(event) => handleChange(event.target.value, setHourValue)}
           />
         </Label>
 
@@ -107,7 +147,9 @@ export default function DateTimeField({ name, defaultValue }: Props) {
             name="minute"
             className="form-input appearance-none text-xl"
             value={minuteValue}
-            onChange={(event) => setMinuteValue(event.target.value)}
+            onChange={(event) =>
+              handleChange(event.target.value, setMinuteValue)
+            }
           />
         </Label>
       </div>

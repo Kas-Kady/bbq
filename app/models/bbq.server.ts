@@ -8,7 +8,8 @@ import { getErrorMessage } from '~/utils';
 type BBQ = Omit<PrismaBBQModel, 'createdAt' | 'updatedAt'>;
 
 type BBQResponse = Omit<BBQ, 'date'> & {
-  date: string;
+  date: string | null;
+  proposedDates: string[] | null;
 };
 
 type Upgrade = Omit<PrismaUpgradeModel, 'createdAt' | 'updatedAt'>;
@@ -31,12 +32,14 @@ export function createBBQ({
   title,
   description,
   datetime,
+  proposedDates,
   upgrades,
 }: {
   slug: string;
   title: string;
   description: string;
-  datetime: Date;
+  datetime: Date | undefined;
+  proposedDates: string[] | undefined;
   upgrades: Upgrade[];
 }) {
   return prisma.bBQ
@@ -46,6 +49,7 @@ export function createBBQ({
         title,
         description,
         date: datetime,
+        proposedDates,
         upgrades: {
           createMany: {
             data: upgrades.map(({ description, amount }) => ({
@@ -68,13 +72,15 @@ export function updateBBQ({
   title,
   description,
   datetime,
+  proposedDates,
   upgrades,
 }: {
   id: string;
   slug: string;
   title: string;
   description: string;
-  datetime: Date;
+  datetime: Date | undefined;
+  proposedDates: string[] | undefined;
   upgrades: Upgrade[];
 }) {
   return prisma.bBQ
@@ -85,6 +91,7 @@ export function updateBBQ({
         title,
         description,
         date: datetime,
+        proposedDates,
         upgrades: {
           deleteMany: {},
           createMany: {

@@ -6,6 +6,7 @@ import {
   Scripts,
   ScrollRestoration,
 } from '@remix-run/react';
+import Footer from '~/components/Footer';
 
 type Props = {
   children: ReactNode;
@@ -20,8 +21,9 @@ export function Document({ children }: Props) {
         <Meta />
         <Links />
       </head>
-      <body className="h-full font-sans">
+      <body className="flex h-full flex-col font-sans">
         {children}
+        <Footer />
         <ScrollRestoration />
         <Scripts />
         <LiveReload />

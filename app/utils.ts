@@ -142,6 +142,13 @@ export function formatDateToLocale(date: Date | string) {
   return new Intl.DateTimeFormat('nl-NL', options).format(dateObj);
 }
 
+export function formatAmountToLocale(amount: number) {
+  return new Intl.NumberFormat('nl-NL', {
+    style: 'currency',
+    currency: 'EUR',
+  }).format(amount);
+}
+
 export function getErrorMessage(err: unknown) {
   // https://kentcdodds.com/blog/get-a-catch-block-error-message-with-typescript
   let message;

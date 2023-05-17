@@ -38,10 +38,11 @@ model Password {
 model BBQ {
   id String @id @default(cuid())
 
-  slug        String   @unique
-  title       String
-  description String
-  date        DateTime
+  slug          String    @unique
+  title         String
+  description   String
+  date          DateTime?
+  proposedDates String[]  @default([])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
