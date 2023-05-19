@@ -1,15 +1,14 @@
 import type { LoaderArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
-import invariant from 'tiny-invariant';
 import { Link, useLoaderData } from '@remix-run/react';
+import invariant from 'tiny-invariant';
+import { ROLE } from '@prisma/client';
 import { getBBQ } from '~/models/bbq.server';
 import Navigation from '~/components/Navigation';
+import Button from '~/components/Button';
 import MainLayout from '~/layouts/Main';
 import { formatAmountToLocale, formatDateToLocale } from '~/utils';
-import Button from '~/components/Button';
 import { getUser } from '~/session.server';
-import { ROLE } from '@prisma/client';
-import Anchor from '~/components/Anchor';
 
 export async function loader({ request, params }: LoaderArgs) {
   const user = await getUser(request);
@@ -55,7 +54,11 @@ export default function BBQRoute() {
           </div>
 
           <div className="w-full flex-none">
-            <Button className="w-full" variant="primary">
+            <Button
+              className="w-full"
+              variant="primary"
+              href={`/bbq/${bbq.slug}/inschrijven`}
+            >
               Inschrijven
             </Button>
 

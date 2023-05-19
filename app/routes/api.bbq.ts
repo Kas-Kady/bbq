@@ -30,11 +30,9 @@ export async function action({ request }: ActionArgs) {
     bbqDateTime = new Date(datetime);
   }
 
-  console.log('proposedDates', proposedDates);
   if (proposedDates !== null && typeof proposedDates === 'string') {
     bbqProposedDates = JSON.parse(proposedDates) as string[];
   }
-  console.log('bbqProposedDates', bbqProposedDates);
 
   if (id !== null && typeof id !== 'undefined') {
     invariant(typeof id === 'string', 'id must be a string');
