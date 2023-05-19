@@ -1,12 +1,25 @@
 import Input from './Input';
 
-type Props = Omit<JSX.IntrinsicElements['input'], 'type'>;
+type SingleLineTextInputProps = Omit<JSX.IntrinsicElements['input'], 'type'> & {
+  multiline?: false;
+};
 
-export default function TextInput({ className, ...props }: Props) {
-  return (
-    <Input
-      type="text"
-      {...props}
-    />
-  );
+type MultiLineTextInputProps = JSX.IntrinsicElements['textarea'] & {
+  multiline?: true;
+};
+
+type Props = SingleLineTextInputProps | MultiLineTextInputProps;
+
+export default function TextInput({ multiline = false, ...props }: Props) {
+  if (multiline) {
+    props = props as MultiLineTextInputProps;
+    return (
+      <textarea
+        className={`${props.className} w-full focus:outline-none focus-visible:ring focus-visible:ring-primary focus-visible:ring-offset-2`}
+        name={props.name}
+      />
+    );
+  }
+  props = props as SingleLineTextInputProps;
+  return <Input type="text" {...props} />;
 }

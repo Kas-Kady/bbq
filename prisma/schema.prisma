@@ -62,7 +62,9 @@ model Attendee {
   bbq    BBQ    @relation(fields: [bbqId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   bbqId  String
 
-  brings String[]
+  brings         String?
+  availableDates String[]
+  chosenUpgrades Upgrade[]
 }
 
 model Upgrade {
@@ -78,4 +80,6 @@ model Upgrade {
 
   description String
   amount      Int
+  Attendee    Attendee? @relation(fields: [attendeeId], references: [id])
+  attendeeId  String?
 }
