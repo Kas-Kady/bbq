@@ -66,7 +66,7 @@ export async function action({ request, params }: ActionArgs) {
   const upgrades = formData.get('upgrades');
 
   let errors: ActionData['errors'] = {};
-  let attendee: User;
+  let attendee: User | undefined = undefined;
 
   invariant(
     typeof brings === 'string' ||
@@ -140,6 +140,8 @@ export async function action({ request, params }: ActionArgs) {
   if (Object.keys(errors).length > 0) {
     return json<ActionData>({ errors });
   }
+
+  invariant(typeof attendee !== 'undefined', 'Attendee needs to be set');
 
   await attendBBQ({
     userId: attendee.id,
