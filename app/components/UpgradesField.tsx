@@ -72,7 +72,7 @@ function UpgradeField({
         <UpgradeLabel label="Wat voor upgrade">
           <TextInput
             defaultValue={description}
-            onChange={(event) => setDescription(event.target.value)}
+            onChange={(event: any) => setDescription(event.target.value)}
           />
         </UpgradeLabel>
 

@@ -3,7 +3,9 @@ import { useActionData, useLoaderData } from '@remix-run/react';
 import type { ActionArgs, LoaderArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import invariant from 'tiny-invariant';
-import { getBBQ } from '~/models/bbq.server';
+import type { User } from '@prisma/client';
+import type { Upgrade } from '~/models/bbq.server';
+import { attendBBQ, getBBQ } from '~/models/bbq.server';
 import { getUser } from '~/session.server';
 import Navigation from '~/components/Navigation';
 import MainLayout from '~/layouts/Main';
@@ -18,6 +20,7 @@ import PickList from '~/components/PickList';
 import { formatAmountToLocale } from '~/utils';
 import Button from '~/components/Button';
 import ErrorMessage from '~/components/ErrorMessage';
+import { createUser, getUserByEmail } from '~/models/user.server';
 
 type ActionData = {
   errors?: {
@@ -27,6 +30,7 @@ type ActionData = {
     verifiedPassword?: string;
     dates?: string;
   };
+  succes?: boolean;
 };
 
 export async function loader({ request, params }: LoaderArgs) {
@@ -42,8 +46,13 @@ export async function loader({ request, params }: LoaderArgs) {
   return json({ user, bbq });
 }
 
-export async function action({ request }: ActionArgs) {
+export async function action({ request, params }: ActionArgs) {
   const user = await getUser(request);
+  const { slug } = params;
+  invariant(slug !== undefined, 'Slug needs to be set');
+
+  const bbq = await getBBQ(slug);
+  invariant(bbq !== null, 'No BBQ found.');
 
   const formData = await request.formData();
 
@@ -57,34 +66,59 @@ export async function action({ request }: ActionArgs) {
   const upgrades = formData.get('upgrades');
 
   let errors: ActionData['errors'] = {};
+  let attendee: User;
+
+  invariant(
+    typeof brings === 'string' ||
+      typeof brings === 'undefined' ||
+      brings === null,
+    'Name needs to be a string',
+  );
 
   if (typeof name !== 'string' || !name) {
     errors.name = 'Vul je naam in.';
   }
   invariant(typeof name === 'string', 'Name needs to be a string');
 
-  if (createAccount && createAccount === 'on') {
-    if (typeof email !== 'string' || !email) {
-      errors.email = 'Vul je e-mailadres in.';
-    }
-    invariant(typeof email === 'string', 'Email needs to be a string');
+  if (typeof email !== 'string' || !email) {
+    errors.email = 'Vul je e-mailadres in.';
+  }
+  invariant(typeof email === 'string', 'Email needs to be a string');
 
-    if (typeof password !== 'string' || !password) {
-      errors.password = 'Vul een wachtwoord in.';
-    }
-    invariant(typeof password === 'string', 'Password needs to be a string');
+  if (user) {
+    attendee = user;
+  } else {
+    const existingUser = await getUserByEmail(email);
 
-    if (typeof verifiedPassword !== 'string' || !verifiedPassword) {
-      errors.verifiedPassword = 'Bevestig je wachtwoord.';
-    }
-    invariant(
-      typeof verifiedPassword === 'string',
-      'Password needs to be a string',
-    );
+    if (existingUser) {
+      attendee = existingUser;
+    } else if (createAccount && createAccount === 'on') {
+      if (typeof password !== 'string' || !password) {
+        errors.password = 'Vul een wachtwoord in.';
+      }
+      invariant(typeof password === 'string', 'Password needs to be a string');
 
-    console.log('password', password, 'verifiedPassword', verifiedPassword);
-    if (password !== verifiedPassword) {
-      errors.password = 'Wachtwoorden komen niet overeen.';
+      if (typeof verifiedPassword !== 'string' || !verifiedPassword) {
+        errors.verifiedPassword = 'Bevestig je wachtwoord.';
+      }
+      invariant(
+        typeof verifiedPassword === 'string',
+        'Password needs to be a string',
+      );
+
+      if (password !== verifiedPassword) {
+        errors.password = 'Wachtwoorden komen niet overeen.';
+      }
+
+      console.log('has password', password, verifiedPassword, errors);
+
+      if (Object.keys(errors).length > 0) {
+        attendee = await createUser(name, email, password);
+      }
+    } else {
+      if (Object.keys(errors).length > 0) {
+        attendee = await createUser(name, email);
+      }
     }
   }
 
@@ -95,27 +129,27 @@ export async function action({ request }: ActionArgs) {
 
   const attendanceDates = (dates as string).split(',');
 
-  let attendanceUpgrades: string[] = [];
+  let attendanceUpgrades: Upgrade[] = [];
   if (upgrades && typeof upgrades === 'string' && upgrades !== '') {
-    attendanceUpgrades = (upgrades as string).split(',');
+    const chosenUpgrades = (upgrades as string).split(',');
+    attendanceUpgrades = bbq.upgrades.filter((upgrade) =>
+      chosenUpgrades.includes(upgrade.description),
+    );
   }
-
-  console.log('errors', errors);
 
   if (Object.keys(errors).length > 0) {
     return json<ActionData>({ errors });
   }
 
-  console.log('result', {
-    name,
-    email,
-    password: password ? password : 'no account created',
+  await attendBBQ({
+    userId: attendee.id,
+    bbqSlug: slug,
     brings,
-    attendanceDates,
-    attendanceUpgrades,
+    availableDates: attendanceDates,
+    chosenUpgrades: attendanceUpgrades,
   });
 
-  return json<ActionData>({});
+  return json<ActionData>({ succes: true });
 }
 
 export default function BBQAttendanceRoute() {
@@ -140,55 +174,47 @@ export default function BBQAttendanceRoute() {
       <Navigation />
 
       <MainLayout>
-        <h1 className="font-handwriting text-7xl">
-          Inschrijven voor {bbq.title}
-        </h1>
+        {actionData?.succes ? (
+          <>
+            <h1 className="font-handwriting text-7xl">Bedankt!</h1>
+            <p className="my-14 w-1/2 text-2xl">
+              Je bent ingeschreven voor {bbq.title}. We laten je zo snel
+              mogelijk weten wanneer je welkom bent!
+            </p>
+          </>
+        ) : (
+          <>
+            <h1 className="font-handwriting text-7xl">
+              Inschrijven voor {bbq.title}
+            </h1>
 
-        <p className="my-14 w-1/2 text-2xl">
-          Leuk dat je erbij bent! Vul hieronder je gegevens in en kies op welke
-          data je kan. We laten je zo snel mogelijk weten wanneer je welkom
-          bent.
-        </p>
+            <p className="my-14 w-1/2 text-2xl">
+              Leuk dat je erbij bent! Vul hieronder je gegevens in en kies op
+              welke data je kan. We laten je zo snel mogelijk weten wanneer je
+              welkom bent.
+            </p>
 
-        <form method="post" className="grid w-full grid-cols-2 gap-10">
-          <div className="space-y-6">
-            <Label label="Wat is je naam?" stacked>
-              <TextInput
-                name="name"
-                aria-invalid={actionData?.errors?.name ? true : undefined}
-                aria-describedby="name-error"
-              />
-              {actionData?.errors?.name ? (
-                <ErrorMessage
-                  id="name-error"
-                  message={actionData.errors.name}
-                />
-              ) : null}
-            </Label>
-
-            {!user ? (
-              <div>
-                <Label label="Wil je een account aanmaken?" stacked={false}>
-                  <Checkbox
-                    name="create-account"
-                    defaultChecked={createAccount}
-                    onChange={handleCheckboxChange}
+            <form method="post" className="grid w-full grid-cols-2 gap-10">
+              <div className="space-y-6">
+                <Label label="Wat is je naam?" stacked>
+                  <TextInput
+                    name="name"
+                    defaultValue={user?.name}
+                    aria-invalid={actionData?.errors?.name ? true : undefined}
+                    aria-describedby="name-error"
                   />
+                  {actionData?.errors?.name ? (
+                    <ErrorMessage
+                      id="name-error"
+                      message={actionData.errors.name}
+                    />
+                  ) : null}
                 </Label>
-                <p className="text-sm">
-                  Met een account kun je later nog je aanwezigheid{' '}
-                  {bbq.upgrades.length > 0 ? ' en upgrades ' : ''} wijzigen. Op
-                  een later stadium kunnen we je via de mail laten weten wanneer
-                  er een datum is geprikt.
-                </p>
-              </div>
-            ) : null}
 
-            {createAccount ? (
-              <>
                 <Label label="Wat is je e-mailadres?" stacked>
                   <EmailInput
                     name="email"
+                    defaultValue={user?.email}
                     aria-invalid={actionData?.errors?.email ? true : undefined}
                     aria-describedby="email-error"
                   />
@@ -200,73 +226,99 @@ export default function BBQAttendanceRoute() {
                   ) : null}
                 </Label>
 
-                <Label label="Kies een wachtwoord" stacked>
-                  <PasswordInput
-                    name="password"
-                    autoComplete="new-password"
-                    aria-invalid={
-                      actionData?.errors?.password ? true : undefined
-                    }
-                    aria-describedby="password-error"
-                  />
-                  {actionData?.errors?.password ? (
-                    <ErrorMessage
-                      id="password-error"
-                      message={actionData.errors.password}
-                    />
-                  ) : null}
-                </Label>
-
-                <Label label="Herhaal je wachtwoord" stacked>
-                  <PasswordInput
-                    name="password-verify"
-                    autoComplete="new-password"
-                    aria-invalid={
-                      actionData?.errors?.verifiedPassword ? true : undefined
-                    }
-                    aria-describedby="verified-password-error"
-                  />
-                  {actionData?.errors?.verifiedPassword ? (
-                    <ErrorMessage
-                      id="verified-password-error"
-                      message={actionData.errors.verifiedPassword}
-                    />
-                  ) : null}
-                </Label>
-              </>
-            ) : null}
-
-            <Label label="Wat neem je mee (optioneel)?" stacked>
-              <TextInput name="brings" multiline />
-            </Label>
-          </div>
-
-          <div className="space-y-6">
-            {bbq.proposedDates.length > 0 ? (
-              <>
-                <h2>Op welke datums zou je kunnen?</h2>
-                <DatePicker name="attendance-dates" dates={bbq.proposedDates} />
-                {actionData?.errors?.dates ? (
-                  <ErrorMessage id="" message={actionData.errors.dates} />
+                {!user ? (
+                  <div>
+                    <Label label="Wil je een account aanmaken?" stacked={false}>
+                      <Checkbox
+                        name="create-account"
+                        defaultChecked={createAccount}
+                        onChange={handleCheckboxChange}
+                      />
+                    </Label>
+                    <p className="text-sm">
+                      Met een account kun je later nog je aanwezigheid{' '}
+                      {bbq.upgrades.length > 0 ? ' en upgrades ' : ''} voor je
+                      aangemelde BBQ's wijzigen.
+                    </p>
+                  </div>
                 ) : null}
-              </>
-            ) : null}
 
-            {bbq.upgrades.length > 0 ? (
-              <div className="space-y-2">
-                <h2>Wil je een upgrade?</h2>
-                <PickList name="upgrades" items={upgrades} />
-                <p className="text-sm italic">
-                  Upgrades af te rekenen bij de BBQ met geld of dansjes.
-                </p>
+                {createAccount ? (
+                  <>
+                    <Label label="Kies een wachtwoord" stacked>
+                      <PasswordInput
+                        name="password"
+                        autoComplete="new-password"
+                        aria-invalid={
+                          actionData?.errors?.password ? true : undefined
+                        }
+                        aria-describedby="password-error"
+                      />
+                      {actionData?.errors?.password ? (
+                        <ErrorMessage
+                          id="password-error"
+                          message={actionData.errors.password}
+                        />
+                      ) : null}
+                    </Label>
+
+                    <Label label="Herhaal je wachtwoord" stacked>
+                      <PasswordInput
+                        name="password-verify"
+                        autoComplete="new-password"
+                        aria-invalid={
+                          actionData?.errors?.verifiedPassword
+                            ? true
+                            : undefined
+                        }
+                        aria-describedby="verified-password-error"
+                      />
+                      {actionData?.errors?.verifiedPassword ? (
+                        <ErrorMessage
+                          id="verified-password-error"
+                          message={actionData.errors.verifiedPassword}
+                        />
+                      ) : null}
+                    </Label>
+                  </>
+                ) : null}
+
+                <Label label="Wat neem je mee (optioneel)?" stacked>
+                  <TextInput name="brings" multiline />
+                </Label>
               </div>
-            ) : null}
-          </div>
 
-          <Button variant="primary" type="submit">
-            Inschrijven
-          </Button>
-        </form>
+              <div className="space-y-6">
+                {bbq.proposedDates.length > 0 ? (
+                  <>
+                    <h2>Op welke datums zou je kunnen?</h2>
+                    <DatePicker
+                      name="attendance-dates"
+                      dates={bbq.proposedDates}
+                    />
+                    {actionData?.errors?.dates ? (
+                      <ErrorMessage id="" message={actionData.errors.dates} />
+                    ) : null}
+                  </>
+                ) : null}
+
+                {bbq.upgrades.length > 0 ? (
+                  <div className="space-y-2">
+                    <h2>Wil je een upgrade?</h2>
+                    <PickList name="upgrades" items={upgrades} />
+                    <p className="text-sm italic">
+                      Upgrades af te rekenen bij de BBQ met geld of dansjes.
+                    </p>
+                  </div>
+                ) : null}
+              </div>
+
+              <Button variant="primary" type="submit">
+                Inschrijven
+              </Button>
+            </form>
+          </>
+        )}
       </MainLayout>
     </>
   );

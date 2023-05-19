@@ -108,3 +108,33 @@ export function updateBBQ({
       throw new Error(`Failed to update BBQ: ${message}`);
     });
 }
+
+export function attendBBQ({
+  userId,
+  bbqSlug,
+  availableDates,
+  chosenUpgrades,
+  brings,
+}: {
+  userId: string;
+  bbqSlug: string;
+  availableDates: string[];
+  chosenUpgrades: Upgrade[];
+  brings: string | null;
+}) {
+  return prisma.bBQ.update({
+    where: { slug: bbqSlug },
+    data: {
+      attendees: {
+        create: {
+          user: { connect: { id: userId } },
+          availableDates,
+          chosenUpgrades: {
+            connect: chosenUpgrades.map(({ id }) => ({ id })),
+          },
+          brings,
+        },
+      },
+    },
+  });
+}
