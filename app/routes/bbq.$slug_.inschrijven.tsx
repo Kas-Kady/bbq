@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useActionData, useLoaderData } from '@remix-run/react';
+import { Form, useActionData, useLoaderData } from '@remix-run/react';
 import type { ActionArgs, LoaderArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import invariant from 'tiny-invariant';
@@ -196,7 +196,7 @@ export default function BBQAttendanceRoute() {
               welkom bent.
             </p>
 
-            <form
+            <Form
               method="post"
               className="grid w-full grid-cols-1 gap-10 md:grid-cols-2"
             >
@@ -325,7 +325,7 @@ export default function BBQAttendanceRoute() {
               <Button variant="primary" type="submit">
                 Inschrijven
               </Button>
-            </form>
+            </Form>
           </>
         )}
       </MainLayout>

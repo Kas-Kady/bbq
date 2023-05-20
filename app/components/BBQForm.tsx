@@ -7,6 +7,7 @@ import Editor from '~/components/Editor';
 import UpgradesField from '~/components/UpgradesField';
 import Button from '~/components/Button';
 import DatesPickerEntryField from '~/components/DatesPickerEntryField';
+import { Form } from '@remix-run/react';
 
 type Props = {
   action: string;
@@ -16,7 +17,7 @@ type Props = {
 
 export default function BBQForm({ action, bbq, upgrades }: Props) {
   return (
-    <form action={action} method="post" className="space-y-10">
+    <Form action={action} method="post" className="space-y-10">
       <input hidden name="id" defaultValue={bbq?.id} />
       <div className="flex flex-col gap-4 md:flex-row md:gap-16">
         <div className="w-full">
@@ -63,6 +64,6 @@ export default function BBQForm({ action, bbq, upgrades }: Props) {
           </Button>
         </div>
       </div>
-    </form>
+    </Form>
   );
 }
