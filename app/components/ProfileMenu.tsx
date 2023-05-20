@@ -13,7 +13,7 @@ export default function ProfileMenu() {
       <ul className="mb-0 mt-5 space-y-5 sm:mb-10">
         <li>
           <Link to="/profile/bbqs" className="text-2xl">
-            BBQ's
+            Mijn BBQ's bekijken
           </Link>
         </li>
         <li>

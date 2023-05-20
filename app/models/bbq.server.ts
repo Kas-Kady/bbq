@@ -27,6 +27,13 @@ export function getBBQ(slug: string) {
   });
 }
 
+export function getBBQsForUser(userId: string) {
+  return prisma.bBQ.findMany({
+    where: { attendees: { some: { userId } } },
+    include: { upgrades: true },
+  });
+}
+
 export function createBBQ({
   slug,
   title,
