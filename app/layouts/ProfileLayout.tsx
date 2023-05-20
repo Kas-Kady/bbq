@@ -5,5 +5,5 @@ type Props = {
 };
 
 export default function ProfileLayout({ children }: Props) {
-  return <main className="flex h-full flex-row">{children}</main>;
+  return <main className="flex h-full flex-col">{children}</main>;
 }

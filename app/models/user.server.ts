@@ -70,3 +70,14 @@ export async function verifyLogin(
 
   return userWithoutPassword;
 }
+
+export async function hasPassword(email: User['email']) {
+  const user = await prisma.user.findUnique({
+    where: { email },
+    include: {
+      password: true,
+    },
+  });
+
+  return !!user?.password;
+}

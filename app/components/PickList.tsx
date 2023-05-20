@@ -66,9 +66,8 @@ function PickerItem({ item, defaultChecked, onCheckChange }: PickerItemProps) {
       `}
     >
       <Label
-        className="cursor-pointer justify-between px-4 pt-2"
+        className="cursor-pointer !flex-row justify-between px-4 pt-2"
         label={item.label}
-        stacked={false}
       >
         <Checkbox
           color="text-green-heavy"

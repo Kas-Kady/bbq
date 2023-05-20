@@ -34,26 +34,31 @@ export default function BBQRoute() {
       <MainLayout>
         <div
           className="
+          grid-rows-[auto,
+          1fr,1fr]
           prose
           prose-lg
           grid
-          max-w-none
-          grid-cols-1
-          grid-rows-3
+          max-w-none grid-cols-1
           gap-2
-          [grid-template-areas:_'title'_'information'_'upgrades']
-          sm:grid-cols-[3fr,1fr]
-          sm:grid-rows-2
-          sm:[grid-template-areas:_'title_title'_'information_upgrades']
+          [grid-template-areas:_'title'_'description'_'actions']
+          md:grid-cols-[1.5fr,1fr]
+          md:grid-rows-[auto,1fr]
+          md:[grid-template-areas:_'title_title'_'description_actions']
+          lg:grid-cols-[3fr,1fr]
         "
         >
-          <div className="w-full flex-none">
+          <div className="w-full flex-none [grid-area:_title]">
             <h1>{title}</h1>
             {date ? <p>Wanneer: {formatDateToLocale(date)}</p> : null}
-            <div dangerouslySetInnerHTML={{ __html: description }} />
           </div>
 
-          <div className="w-full flex-none">
+          <div
+            className="w-full [grid-area:_description]"
+            dangerouslySetInnerHTML={{ __html: description }}
+          />
+
+          <div className="w-full flex-none [grid-area:_actions]">
             <Button
               className="w-full"
               variant="primary"

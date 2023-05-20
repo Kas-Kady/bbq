@@ -15,11 +15,13 @@ export const loader = async ({ request }: LoaderArgs) => {
 export default function ProfileRoute() {
   return (
     <ProfileLayout>
-      <ProfileMenu />
+      <Navigation />
+      <div className="flex h-full w-full flex-col sm:h-full sm:w-full sm:flex-row">
+        <ProfileMenu />
 
-      <div className="w-3/4">
-        <Navigation />
-        <Outlet />
+        <div className="mt-10">
+          <Outlet />
+        </div>
       </div>
     </ProfileLayout>
   );

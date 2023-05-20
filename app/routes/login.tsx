@@ -3,7 +3,7 @@ import { json, redirect } from '@remix-run/node';
 import { Form, useActionData, useSearchParams } from '@remix-run/react';
 import { useEffect, useRef } from 'react';
 
-import { verifyLogin } from '~/models/user.server';
+import { hasPassword, verifyLogin } from '~/models/user.server';
 import { createUserSession, getUser } from '~/session.server';
 
 import EmailInput from '~/components/EmailInput';
@@ -45,12 +45,19 @@ export const action = async ({ request }: ActionArgs) => {
     errors.email = 'E-mailadres is ongeldig';
   }
 
-  if (!validatePassword(password)) {
-    errors.password = 'Wachtwoord is verplicht';
-  }
+  const userHasPassword = await hasPassword(email as string);
 
-  if (!checkPasswordLength(password as string)) {
-    errors.password = 'Wachtwoord is te kort';
+  if (!userHasPassword) {
+    errors.email =
+      'Je hebt geen wachtwoord ingesteld, je kan dus niet inloggen.';
+  } else {
+    if (!validatePassword(password)) {
+      errors.password = 'Wachtwoord is verplicht';
+    }
+
+    if (!checkPasswordLength(password as string)) {
+      errors.password = 'Wachtwoord is te kort';
+    }
   }
 
   if (Object.keys(errors).length > 0) {

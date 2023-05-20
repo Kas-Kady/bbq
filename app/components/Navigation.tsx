@@ -10,7 +10,7 @@ export default function Navigation() {
   const location = useLocation();
 
   return (
-    <nav className="mb-10 flex flex-row items-center justify-between border-b-2 border-b-cyan-500 px-10 py-5">
+    <nav className="items-left flex flex-col justify-between border-b-2 border-b-cyan-500 px-10 py-5 sm:flex-row sm:items-center">
       <h1 className="font-handwriting text-3xl">
         <Link to="/">BBQ</Link>
       </h1>

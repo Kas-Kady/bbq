@@ -144,7 +144,7 @@ export async function action({ request, params }: ActionArgs) {
   invariant(typeof attendee !== 'undefined', 'Attendee needs to be set');
 
   await attendBBQ({
-    userId: attendee.id,
+    userId: attendee?.id,
     bbqSlug: slug,
     brings,
     availableDates: attendanceDates,
@@ -190,13 +190,16 @@ export default function BBQAttendanceRoute() {
               Inschrijven voor {bbq.title}
             </h1>
 
-            <p className="my-14 w-1/2 text-2xl">
+            <p className="my-14 w-full text-2xl lg:w-1/2">
               Leuk dat je erbij bent! Vul hieronder je gegevens in en kies op
               welke data je kan. We laten je zo snel mogelijk weten wanneer je
               welkom bent.
             </p>
 
-            <form method="post" className="grid w-full grid-cols-2 gap-10">
+            <form
+              method="post"
+              className="grid w-full grid-cols-1 gap-10 md:grid-cols-2"
+            >
               <div className="space-y-6">
                 <Label label="Wat is je naam?" stacked>
                   <TextInput
@@ -230,7 +233,11 @@ export default function BBQAttendanceRoute() {
 
                 {!user ? (
                   <div>
-                    <Label label="Wil je een account aanmaken?" stacked={false}>
+                    <Label
+                      label="Wil je een account aanmaken?"
+                      stacked={false}
+                      className="!flex-row"
+                    >
                       <Checkbox
                         name="create-account"
                         defaultChecked={createAccount}
