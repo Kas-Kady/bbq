@@ -7,7 +7,7 @@ import { getBBQs } from '~/models/bbq.server';
 import { json } from '@remix-run/node';
 import { Link, useLoaderData } from '@remix-run/react';
 
-export const meta: V2_MetaFunction = () => [{ title: 'Remix Notes' }];
+export const meta: V2_MetaFunction = () => [{ title: 'BBQ' }];
 
 export async function loader() {
   const bbqs = await getBBQs();

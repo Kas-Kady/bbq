@@ -1,5 +1,5 @@
 import type { LoaderArgs } from '@remix-run/node';
-import { json } from '@remix-run/node';
+import { json, V2_MetaFunction } from '@remix-run/node';
 import { requireUser } from '~/session.server';
 import invariant from 'tiny-invariant';
 import { unattendBBQ } from '~/models/bbq.server';
@@ -17,6 +17,12 @@ export async function loader({ request, params }: LoaderArgs) {
 
   return json({ bbq });
 }
+
+export const meta: V2_MetaFunction = ({ data }) => [
+  {
+    title: data.bbq.title,
+  },
+];
 
 export default function UnattendBBQRoute() {
   const { bbq } = useLoaderData<typeof loader>();

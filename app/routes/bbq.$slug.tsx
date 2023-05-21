@@ -1,4 +1,4 @@
-import type { LoaderArgs } from '@remix-run/node';
+import type { LoaderArgs, V2_MetaFunction } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { Link, useLoaderData } from '@remix-run/react';
 import invariant from 'tiny-invariant';
@@ -27,6 +27,12 @@ export async function loader({ request, params }: LoaderArgs) {
 
   return json({ user, bbq, attendee });
 }
+
+export const meta: V2_MetaFunction = ({ data }) => [
+  {
+    title: data.bbq.title,
+  },
+];
 
 export default function BBQRoute() {
   const { user, bbq, attendee } = useLoaderData<typeof loader>();

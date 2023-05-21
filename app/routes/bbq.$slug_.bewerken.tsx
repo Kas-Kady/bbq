@@ -1,5 +1,5 @@
 import type { ActionArgs, LoaderArgs } from '@remix-run/node';
-import { json } from '@remix-run/node';
+import { json, V2_MetaFunction } from '@remix-run/node';
 import { requireUser } from '~/session.server';
 import invariant from 'tiny-invariant';
 import type { Upgrade } from '~/models/bbq.server';
@@ -85,6 +85,12 @@ export async function action({ request, params }: ActionArgs) {
 
   return json<ActionData>({ succes: true });
 }
+
+export const meta: V2_MetaFunction = ({ data }) => [
+  {
+    title: data.bbq.title,
+  },
+];
 
 export default function EditBBQAttendance() {
   const { bbq, attendee } = useLoaderData<typeof loader>();

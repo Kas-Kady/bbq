@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Form, Link, useActionData, useLoaderData } from '@remix-run/react';
 import type { ActionArgs, LoaderArgs } from '@remix-run/node';
-import { json } from '@remix-run/node';
+import { json, V2_MetaFunction } from '@remix-run/node';
 import invariant from 'tiny-invariant';
 import type { User } from '@prisma/client';
 import type { Upgrade } from '~/models/bbq.server';
@@ -150,6 +150,12 @@ export async function action({ request, params }: ActionArgs) {
 
   return json<ActionData>({ succes: true });
 }
+
+export const meta: V2_MetaFunction = ({ data }) => [
+  {
+    title: data.bbq.title,
+  },
+];
 
 export default function BBQAttendanceRoute() {
   const { user, bbq } = useLoaderData<typeof loader>();
