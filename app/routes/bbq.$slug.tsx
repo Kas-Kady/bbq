@@ -9,6 +9,7 @@ import Button from '~/components/Button';
 import MainLayout from '~/layouts/Main';
 import { formatAmountToLocale, formatDateToLocale } from '~/utils';
 import { getUser } from '~/session.server';
+import Icon from '~/components/Icon';
 
 export async function loader({ request, params }: LoaderArgs) {
   const user = await getUser(request);
@@ -20,11 +21,15 @@ export async function loader({ request, params }: LoaderArgs) {
 
   invariant(bbq !== null, 'No BBQ found.');
 
-  return json({ user, bbq });
+  const attendee = bbq.attendees.find(
+    (attendee) => attendee.userId === user?.id,
+  );
+
+  return json({ user, bbq, attendee });
 }
 
 export default function BBQRoute() {
-  const { user, bbq } = useLoaderData<typeof loader>();
+  const { user, bbq, attendee } = useLoaderData<typeof loader>();
   const { title, description, date } = bbq;
 
   return (
@@ -59,13 +64,32 @@ export default function BBQRoute() {
           />
 
           <div className="w-full flex-none [grid-area:_actions]">
-            <Button
-              className="w-full"
-              variant="primary"
-              href={`/bbq/${bbq.slug}/inschrijven`}
-            >
-              Inschrijven
-            </Button>
+            {attendee ? (
+              <div className="flex flex-col space-y-2">
+                <Button
+                  className="w-full"
+                  variant="primary"
+                  href={`/bbq/${bbq.slug}/bewerken`}
+                >
+                  Mijn inschrijving aanpassen
+                </Button>
+                <Button
+                  className="w-full"
+                  variant="danger"
+                  href={`/bbq/${bbq.slug}/afmelden`}
+                >
+                  Ik kan niet meer komen
+                </Button>
+              </div>
+            ) : (
+              <Button
+                className="w-full"
+                variant="primary"
+                href={`/bbq/${bbq.slug}/inschrijven`}
+              >
+                Inschrijven
+              </Button>
+            )}
 
             {user && user.role === ROLE.ADMIN ? (
               <div className="mt-10 flex flex-col gap-2 bg-secondary-dark p-10">
@@ -84,8 +108,13 @@ export default function BBQRoute() {
                 <ul className="pl-2">
                   {bbq.proposedDates.map((date) => (
                     <li className="list-item list-inside pl-0" key={date}>
-                      <div className="flex flex-row justify-between gap-2">
+                      <div className="flex flex-row gap-2">
                         {formatDateToLocale(date)}
+                        {attendee && attendee.availableDates.includes(date) ? (
+                          <span className="text-green-heavy">
+                            <Icon name="check-circle" prefix="far" />
+                          </span>
+                        ) : null}
                       </div>
                     </li>
                   ))}
@@ -100,7 +129,17 @@ export default function BBQRoute() {
                     <li className="list-item list-inside pl-0" key={upgrade.id}>
                       <div className="flex flex-row justify-between gap-2">
                         <span>{upgrade.description}</span>
-                        <span>{formatAmountToLocale(upgrade.amount)}</span>
+                        <div className="flex flex-row gap-2">
+                          {attendee &&
+                          attendee.chosenUpgrades.find(
+                            (chosenUpgrade) => chosenUpgrade.id === upgrade.id,
+                          ) ? (
+                            <span className="text-green-heavy">
+                              <Icon name="check-circle" prefix="far" />
+                            </span>
+                          ) : null}
+                          {formatAmountToLocale(upgrade.amount)}
+                        </div>
                       </div>
                     </li>
                   ))}

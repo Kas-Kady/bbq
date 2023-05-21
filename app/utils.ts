@@ -2,6 +2,8 @@ import { useMatches } from '@remix-run/react';
 import { useMemo } from 'react';
 
 import type { User } from '~/models/user.server';
+import { PickListItem } from '~/components/PickList';
+import { Upgrade } from '~/models/bbq.server';
 
 const DEFAULT_REDIRECT = '/';
 
@@ -156,4 +158,11 @@ export function getErrorMessage(err: unknown) {
   else message = String(err);
 
   return message;
+}
+
+export function mapUpgradesToPickItems(upgrades: Upgrade[]): PickListItem[] {
+  return upgrades.map(({ description, amount }) => ({
+    label: `${description} (+ ${formatAmountToLocale(amount)})`,
+    value: description,
+  }));
 }

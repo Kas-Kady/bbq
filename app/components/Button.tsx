@@ -4,7 +4,7 @@ type BaseProps = {
   /**
    * The variant (color scheme) of the button.
    */
-  variant?: 'normal' | 'primary' | 'success';
+  variant?: 'normal' | 'primary' | 'success' | 'danger' | 'warning';
 
   /**
    * The size of the button.
@@ -63,11 +63,15 @@ export default function Button({
   size = 'normal',
 }: Props) {
   const classes = `${className} transition focus:outline-none focus-visible:ring focus-visible:ring-primary focus-visible:ring-offset-2 ${
-    variant === 'normal'
-      ? 'bg-zinc-200 text-slate-800 hover:bg-zinc-300'
-      : variant === 'primary'
+    variant === 'primary'
       ? 'bg-cyan-200 text-cyan-900 hover:bg-cyan-400'
-      : 'bg-zinc-200 text-slate-800 hover:bg-emerald-300 hover:text-emerald-900'
+      : variant === 'success'
+      ? 'bg-zinc-200 text-slate-800 hover:bg-emerald-300 hover:text-emerald-900'
+      : variant === 'danger'
+      ? 'bg-rose-200 text-slate-800 hover:bg-red-300'
+      : variant === 'warning'
+      ? 'bg-zinc-200 text-slate-800 hover:bg-yellow-300 hover:text-yellow-900'
+      : 'bg-zinc-200 text-slate-800 hover:bg-zinc-300'
   }
   ${size === 'small' ? 'px-4 py-2' : 'px-8 py-4'}
   ${href ? 'block text-center' : ''}`;

@@ -17,6 +17,7 @@ export default function TextInput({ multiline = false, ...props }: Props) {
       <textarea
         className={`${props.className} w-full focus:outline-none focus-visible:ring focus-visible:ring-primary focus-visible:ring-offset-2`}
         name={props.name}
+        {...props}
       />
     );
   }

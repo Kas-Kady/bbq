@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Form, useActionData, useLoaderData } from '@remix-run/react';
+import { Form, Link, useActionData, useLoaderData } from '@remix-run/react';
 import type { ActionArgs, LoaderArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import invariant from 'tiny-invariant';
@@ -15,9 +15,8 @@ import Checkbox from '~/components/Checkbox';
 import EmailInput from '~/components/EmailInput';
 import PasswordInput from '~/components/PasswordInput';
 import DatePicker from '~/components/DatePicker';
-import type { PickListItem } from '~/components/PickList';
 import PickList from '~/components/PickList';
-import { formatAmountToLocale } from '~/utils';
+import { mapUpgradesToPickItems } from '~/utils';
 import Button from '~/components/Button';
 import ErrorMessage from '~/components/ErrorMessage';
 import { createUser, getUserByEmail } from '~/models/user.server';
@@ -62,7 +61,7 @@ export async function action({ request, params }: ActionArgs) {
   const password = formData.get('password');
   const verifiedPassword = formData.get('password-verify');
   const brings = formData.get('brings');
-  const dates = formData.get('dates');
+  const dates = formData.get('attendance-dates');
   const upgrades = formData.get('upgrades');
 
   let errors: ActionData['errors'] = {};
@@ -110,13 +109,11 @@ export async function action({ request, params }: ActionArgs) {
         errors.password = 'Wachtwoorden komen niet overeen.';
       }
 
-      console.log('has password', password, verifiedPassword, errors);
-
-      if (Object.keys(errors).length > 0) {
+      if (Object.keys(errors).length === 0) {
         attendee = await createUser(name, email, password);
       }
     } else {
-      if (Object.keys(errors).length > 0) {
+      if (Object.keys(errors).length === 0) {
         attendee = await createUser(name, email);
       }
     }
@@ -164,12 +161,7 @@ export default function BBQAttendanceRoute() {
     setCreateAccount(event.target.checked);
   };
 
-  let upgrades: PickListItem[] = bbq.upgrades.map(({ description, amount }) => {
-    return {
-      label: `${description} (+ ${formatAmountToLocale(amount)})`,
-      value: description,
-    };
-  });
+  const upgrades = mapUpgradesToPickItems(bbq.upgrades);
 
   return (
     <>
@@ -183,6 +175,7 @@ export default function BBQAttendanceRoute() {
               Je bent ingeschreven voor {bbq.title}. We laten je zo snel
               mogelijk weten wanneer je welkom bent!
             </p>
+            <Link to={`/bbq/${bbq.slug}`}>Terug naar de BBQ</Link>
           </>
         ) : (
           <>

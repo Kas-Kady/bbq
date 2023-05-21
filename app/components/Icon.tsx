@@ -9,6 +9,7 @@ import {
   faChevronDown,
 } from '@fortawesome/free-solid-svg-icons';
 import {
+  faCheckCircle,
   faCircleXmark,
   faPenToSquare,
 } from '@fortawesome/free-regular-svg-icons';
@@ -22,6 +23,7 @@ library.add(
   faPenToSquare,
   faChevronUp,
   faChevronDown,
+  faCheckCircle,
 );
 
 type Props = {

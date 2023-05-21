@@ -23,7 +23,14 @@ export function getBBQs() {
 export function getBBQ(slug: string) {
   return prisma.bBQ.findUnique({
     where: { slug },
-    include: { upgrades: true },
+    include: {
+      upgrades: true,
+      attendees: {
+        include: {
+          chosenUpgrades: true,
+        },
+      },
+    },
   });
 }
 
@@ -144,4 +151,95 @@ export function attendBBQ({
       },
     },
   });
+}
+
+export async function unattendBBQ(userId: string, bbqSlug: string) {
+  const attendee = await getAttendee(bbqSlug, userId);
+
+  return prisma.bBQ.update({
+    where: { slug: bbqSlug },
+    data: {
+      attendees: {
+        delete: { id: attendee.id },
+      },
+    },
+  });
+}
+
+export async function updateBBQForAttendee({
+  userId,
+  bbqSlug,
+  availableDates,
+  chosenUpgrades,
+  brings,
+}: {
+  userId: string;
+  bbqSlug: string;
+  availableDates: string[];
+  chosenUpgrades: Upgrade[];
+  brings: string | null;
+}) {
+  const attendee = await getAttendee(bbqSlug, userId);
+
+  return prisma.bBQ.update({
+    where: { slug: bbqSlug },
+    include: { attendees: true },
+    data: {
+      attendees: {
+        update: {
+          where: { id: attendee.id },
+          data: {
+            availableDates,
+            chosenUpgrades: {
+              set: chosenUpgrades.map(({ id }) => ({ id })),
+            },
+            brings,
+          },
+        },
+      },
+    },
+  });
+}
+
+export function getBBQForAttendee(bbqSlug: string, attendeeId: string) {
+  // Retrieve from prisma the BBQ with the given slug where the attendee with the given id is attending
+  return prisma.bBQ.findFirst({
+    where: {
+      slug: bbqSlug,
+      attendees: { some: { userId: attendeeId } },
+    },
+    include: {
+      upgrades: true,
+      attendees: {
+        where: { userId: attendeeId },
+        include: {
+          chosenUpgrades: true,
+        },
+      },
+    },
+  });
+}
+
+async function getAttendee(bbqSlug: string, userId: string) {
+  const attendees = await prisma.bBQ.findFirst({
+    where: {
+      slug: bbqSlug,
+      attendees: { some: { userId: userId } },
+    },
+    select: { attendees: { select: { id: true, userId: true } } },
+  });
+
+  if (!attendees) {
+    throw new Error('Attendee not found');
+  }
+
+  const attendee = attendees.attendees.find(
+    (attendee) => attendee.userId === userId,
+  );
+
+  if (!attendee) {
+    throw new Error('Attendee not found');
+  }
+
+  return attendee;
 }

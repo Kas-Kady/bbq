@@ -8,7 +8,11 @@ type Props = {
   defaultCheckedDates?: string[];
 };
 
-export default function DatePicker({ dates, defaultCheckedDates = [] }: Props) {
+export default function DatePicker({
+  name,
+  dates,
+  defaultCheckedDates = [],
+}: Props) {
   const items: PickListItem[] = dates.map((date) => ({
     label: formatDateToLocale(date),
     value: date,
@@ -20,6 +24,6 @@ export default function DatePicker({ dates, defaultCheckedDates = [] }: Props) {
   }));
 
   return (
-    <PickList name="dates" items={items} defaultCheckedItems={checkedItems} />
+    <PickList name={name} items={items} defaultCheckedItems={checkedItems} />
   );
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Label from '~/components/Label';
 import Checkbox from '~/components/Checkbox';
 
@@ -26,11 +26,10 @@ export default function PickList({
       return;
     }
 
-    setCheckedItemsList(checkedItemsList.filter((d) => d !== item));
+    setCheckedItemsList(checkedItemsList.filter((d) => d.value !== item.value));
   };
 
   const checkedItems = checkedItemsList.map((item) => item.value).join(',');
-
   return (
     <>
       <input type="hidden" name={name} value={checkedItems} />
@@ -39,7 +38,9 @@ export default function PickList({
           <PickerItem
             key={item.value}
             item={item}
-            defaultChecked={checkedItemsList?.includes(item)}
+            defaultChecked={checkedItemsList?.some(
+              (d) => d.value === item.value,
+            )}
             onCheckChange={handleCheckboxChange}
           />
         ))}
