@@ -6,6 +6,7 @@ processes = [ ]
 [env]
 PORT = "8080"
 METRICS_PORT = "8081"
+PRIMARY_REGION = "ams"
 
 [metrics]
 port = 8_081
