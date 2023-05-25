@@ -1,4 +1,5 @@
 app = "bbq-4907"
+primary_region = "ams"
 kill_signal = "SIGINT"
 kill_timeout = 5
 processes = [ ]
@@ -6,7 +7,6 @@ processes = [ ]
 [env]
 PORT = "8080"
 METRICS_PORT = "8081"
-PRIMARY_REGION = "ams"
 
 [metrics]
 port = 8_081
