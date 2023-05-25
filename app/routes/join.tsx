@@ -7,6 +7,26 @@ import { createUser, getUserByEmail } from '~/models/user.server';
 import { createUserSession, getUserId } from '~/session.server';
 import { safeRedirect } from '~/utils';
 import { validateEmail } from '~/validations/email';
+import Label from '~/components/Label';
+import TextInput from '~/components/TextInput';
+import EmailInput from '~/components/EmailInput';
+import PasswordInput from '~/components/PasswordInput';
+import Button from '~/components/Button';
+import { checkPasswordLength, validatePassword } from '~/validations/password';
+import invariant from 'tiny-invariant';
+import { isDefined } from '~/validations';
+import { ROLE } from '@prisma/client';
+import ErrorMessage from '~/components/ErrorMessage';
+import Anchor from '~/components/Anchor';
+import Navigation from '~/components/Navigation';
+
+type ActionData = {
+  errors?: {
+    name?: string;
+    email?: string;
+    password?: string;
+  };
+};
 
 export const loader = async ({ request }: LoaderArgs) => {
   const userId = await getUserId(request);
@@ -16,45 +36,45 @@ export const loader = async ({ request }: LoaderArgs) => {
 
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData();
+  const name = formData.get('name');
   const email = formData.get('email');
   const password = formData.get('password');
   const redirectTo = safeRedirect(formData.get('redirectTo'), '/');
+  const formDataRole = formData.get('role');
+
+  const errors: ActionData['errors'] = {};
+
+  isDefined(name);
+  isDefined(email);
+  isDefined(password);
+
+  if (!name) {
+    errors.name = 'Naam is verplicht';
+  }
 
   if (!validateEmail(email)) {
-    return json(
-      { errors: { email: 'Email is invalid', password: null } },
-      { status: 400 }
-    );
+    errors.email = 'Email is verplicht';
   }
 
-  if (typeof password !== 'string' || password.length === 0) {
-    return json(
-      { errors: { email: null, password: 'Password is required' } },
-      { status: 400 }
-    );
-  }
-
-  if (password.length < 8) {
-    return json(
-      { errors: { email: null, password: 'Password is too short' } },
-      { status: 400 }
-    );
+  if (!validatePassword(password) && !checkPasswordLength(password)) {
+    errors.password = 'Wachtwoord is verplicht';
   }
 
   const existingUser = await getUserByEmail(email);
   if (existingUser) {
-    return json(
-      {
-        errors: {
-          email: 'A user already exists with this email',
-          password: null,
-        },
-      },
-      { status: 400 }
-    );
+    errors.email = 'Er bestaat al een account met dit emailadres';
   }
 
-  const user = await createUser(email, password);
+  if (Object.keys(errors).length > 0) {
+    return json({ errors }, { status: 422 });
+  }
+
+  let role: ROLE = 'USER';
+  if (typeof formDataRole === 'string' && formDataRole === 'admin') {
+    role = 'ADMIN';
+  }
+
+  const user = await createUser(name, email, password, role);
 
   return createUserSession({
     redirectTo,
@@ -64,104 +84,84 @@ export const action = async ({ request }: ActionArgs) => {
   });
 };
 
-export const meta: V2_MetaFunction = () => [{ title: 'Sign Up' }];
+export const meta: V2_MetaFunction = () => [{ title: 'Maak account aan' }];
 
 export default function Join() {
   const [searchParams] = useSearchParams();
   const redirectTo = searchParams.get('redirectTo') ?? undefined;
-  const actionData = useActionData<typeof action>();
-  const emailRef = useRef<HTMLInputElement>(null);
-  const passwordRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (actionData?.errors?.email) {
-      emailRef.current?.focus();
-    } else if (actionData?.errors?.password) {
-      passwordRef.current?.focus();
-    }
-  }, [actionData]);
+  const role = searchParams.get('role') ?? 'user';
+  const actionData = useActionData<ActionData>();
 
   return (
-    <div className="flex min-h-full flex-col justify-center">
-      <div className="mx-auto w-full max-w-md px-8">
-        <Form method="post" className="space-y-6">
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Email address
-            </label>
-            <div className="mt-1">
-              <input
-                ref={emailRef}
-                id="email"
-                required
-                autoFocus={true}
+    <>
+      <Navigation />
+      <div className="flex min-h-full flex-col justify-center">
+        <div className="mx-auto w-full max-w-md px-8">
+          <Form method="post" className="space-y-6">
+            <Label label="Naam">
+              <TextInput
+                name="name"
+                aria-invalid={actionData?.errors?.name ? true : undefined}
+                aria-labelledby="name-error"
+              />
+              {actionData?.errors?.name && (
+                <ErrorMessage
+                  id="name-error"
+                  message={actionData.errors.name}
+                />
+              )}
+            </Label>
+
+            <Label label="Email">
+              <EmailInput
                 name="email"
-                type="email"
-                autoComplete="email"
                 aria-invalid={actionData?.errors?.email ? true : undefined}
-                aria-describedby="email-error"
-                className="w-full rounded border border-gray-500 px-2 py-1 text-lg"
+                aria-labelledby="email-error"
               />
-              {actionData?.errors?.email ? (
-                <div className="pt-1 text-red-700" id="email-error">
-                  {actionData.errors.email}
-                </div>
-              ) : null}
-            </div>
-          </div>
+              {actionData?.errors?.email && (
+                <ErrorMessage
+                  id="email-error"
+                  message={actionData.errors.email}
+                />
+              )}
+            </Label>
 
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Password
-            </label>
-            <div className="mt-1">
-              <input
-                id="password"
-                ref={passwordRef}
+            <Label label="Password">
+              <PasswordInput
                 name="password"
-                type="password"
-                autoComplete="new-password"
                 aria-invalid={actionData?.errors?.password ? true : undefined}
-                aria-describedby="password-error"
-                className="w-full rounded border border-gray-500 px-2 py-1 text-lg"
+                aria-labelledby="password-error"
               />
-              {actionData?.errors?.password ? (
-                <div className="pt-1 text-red-700" id="password-error">
-                  {actionData.errors.password}
-                </div>
-              ) : null}
-            </div>
-          </div>
+              {actionData?.errors?.password && (
+                <ErrorMessage
+                  id="password-error"
+                  message={actionData.errors.password}
+                />
+              )}
+            </Label>
 
-          <input type="hidden" name="redirectTo" value={redirectTo} />
-          <button
-            type="submit"
-            className="w-full rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 focus:bg-blue-400"
-          >
-            Create Account
-          </button>
-          <div className="flex items-center justify-center">
-            <div className="text-center text-sm text-gray-500">
-              Already have an account?{' '}
-              <Link
-                className="text-blue-500 underline"
-                to={{
-                  pathname: '/login',
-                  search: searchParams.toString(),
-                }}
-              >
-                Log in
-              </Link>
+            <input type="hidden" name="redirectTo" value={redirectTo} />
+            <input type="hidden" name="role" value={role} />
+
+            <Button variant="primary" className="w-full" type="submit">
+              Maak account aan
+            </Button>
+            <div className="flex items-center justify-end">
+              <div className="text-sm text-gray-500">
+                Heb je al een account?{' '}
+                <Anchor
+                  to={{
+                    pathname: '/login',
+                    search: searchParams.toString(),
+                  }}
+                >
+                  Log dan in
+                </Anchor>
+              </div>
             </div>
-          </div>
-        </Form>
+          </Form>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
