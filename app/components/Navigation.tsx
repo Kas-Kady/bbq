@@ -26,6 +26,9 @@ export default function Navigation() {
             <NavigationItem to={`/login?redirectTo=${location.pathname}`}>
               Inloggen
             </NavigationItem>
+            <NavigationItem to={`/join?redirectTo=${location.pathname}`}>
+              Aanmelden
+            </NavigationItem>
           </>
         )}
       </ul>

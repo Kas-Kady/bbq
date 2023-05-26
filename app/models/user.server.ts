@@ -1,4 +1,4 @@
-import type { Password, User } from '@prisma/client';
+import type { Password, ROLE, User } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import type { Prisma } from '@prisma/client';
 
@@ -18,10 +18,12 @@ export async function createUser(
   name: string,
   email: User['email'],
   password?: string,
+  role?: ROLE,
 ) {
   const data: Prisma.UserCreateArgs['data'] = {
     name,
     email,
+    role,
   };
 
   if (password) {

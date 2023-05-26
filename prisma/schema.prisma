@@ -1,85 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
+model User {
+  id        String     @id @default(cuid())
+  email     String     @unique
+  name      String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  role      ROLE       @default(USER)
+  attended  Attendee[]
+  password  Password?
+  upgrades  Upgrade[]
+}
+
+model Password {
+  hash   String
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model BBQ {
+  id            String     @id @default(cuid())
+  title         String
+  description   String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  date          DateTime?
+  slug          String     @unique
+  proposedDates String[]   @default([])
+  attendees     Attendee[]
+  upgrades      Upgrade[]
+}
+
+model Attendee {
+  id             String    @id @default(cuid())
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  userId         String
+  bbqId          String
+  brings         String?
+  availableDates String[]
+  bbq            BBQ       @relation(fields: [bbqId], references: [id], onDelete: Cascade)
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chosenUpgrades Upgrade[]
+}
+
+model Upgrade {
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  userId      String?
+  bbqId       String
+  description String
+  amount      Int
+  attendeeId  String?
+  Attendee    Attendee? @relation(fields: [attendeeId], references: [id])
+  bbq         BBQ       @relation(fields: [bbqId], references: [id], onDelete: Cascade)
+  User        User?     @relation(fields: [userId], references: [id])
 }
 
 enum ROLE {
   ADMIN
   USER
-}
-
-model User {
-  id    String @id @default(cuid())
-  email String @unique
-  name  String
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  password Password?
-
-  attended Attendee[]
-  upgrades Upgrade[]
-
-  role ROLE @default(USER)
-}
-
-model Password {
-  hash String
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId String @unique
-}
-
-model BBQ {
-  id String @id @default(cuid())
-
-  slug          String    @unique
-  title         String
-  description   String
-  date          DateTime?
-  proposedDates String[]  @default([])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  attendees Attendee[]
-  upgrades  Upgrade[]
-}
-
-model Attendee {
-  id String @id @default(cuid())
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId String
-  bbq    BBQ    @relation(fields: [bbqId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  bbqId  String
-
-  brings         String?
-  availableDates String[]
-  chosenUpgrades Upgrade[]
-}
-
-model Upgrade {
-  id String @id @default(cuid())
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  User   User?   @relation(fields: [userId], references: [id])
-  userId String?
-  bbq    BBQ     @relation(fields: [bbqId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  bbqId  String
-
-  description String
-  amount      Int
-  Attendee    Attendee? @relation(fields: [attendeeId], references: [id])
-  attendeeId  String?
 }

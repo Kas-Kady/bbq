@@ -1,4 +1,5 @@
 app = "bbq-4907"
+primary_region = "ams"
 kill_signal = "SIGINT"
 kill_timeout = 5
 processes = [ ]
