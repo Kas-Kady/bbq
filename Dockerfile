@@ -47,6 +47,7 @@ COPY --from=build /myapp/node_modules/.prisma /myapp/node_modules/.prisma
 
 COPY --from=build /myapp/build /myapp/build
 COPY --from=build /myapp/public /myapp/public
+COPY --from=build /myapp/public/tinymce /myapp/public/tinymce
 ADD . .
 
 CMD ["npm", "start"]
