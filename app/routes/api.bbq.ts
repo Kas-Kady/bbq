@@ -34,7 +34,7 @@ export async function action({ request }: ActionArgs) {
     bbqProposedDates = JSON.parse(proposedDates) as string[];
   }
 
-  if (id !== null && typeof id !== 'undefined') {
+  if (id) {
     invariant(typeof id === 'string', 'id must be a string');
 
     try {
