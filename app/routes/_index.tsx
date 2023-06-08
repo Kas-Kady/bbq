@@ -25,13 +25,20 @@ export default function Index() {
       <MainLayout>
         <h1 className="mb-5 font-handwriting text-7xl">BBQ</h1>
 
-        <ul>
-          {bbqs.map((bbq) => (
-            <li key={bbq.id}>
-              <Link to={`/bbq/${bbq.slug}`}>{bbq.title}</Link>
-            </li>
-          ))}
-        </ul>
+        {bbqs.length === 0 ? (
+          <p className="text-2xl">
+            Er zijn nog geen BBQ's gepland. Kijk later nog eens, of app ons
+            eventjes.
+          </p>
+        ) : (
+          <ul className="list-inside list-disc marker:text-cyan-400">
+            {bbqs.map((bbq) => (
+              <li key={bbq.id}>
+                <Link to={`/bbq/${bbq.slug}`}>{bbq.title}</Link>
+              </li>
+            ))}
+          </ul>
+        )}
       </MainLayout>
     </>
   );
