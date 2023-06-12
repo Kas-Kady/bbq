@@ -33,8 +33,8 @@ export default function ProfileMenu() {
               </Link>
             </li>
             <li>
-              <Link to="/admin/register" className="text-2xl">
-                Nieuwe gebruiker toevoegen
+              <Link to="/profile/inschrijvingen" className="text-2xl">
+                BBQ inschrijvingen bekijken
               </Link>
             </li>
           </ul>

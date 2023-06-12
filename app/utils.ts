@@ -151,6 +151,12 @@ export function formatAmountToLocale(amount: number) {
   }).format(amount);
 }
 
+export function formatPercentageToLocale(percentage: number) {
+  return new Intl.NumberFormat('nl-NL', {
+    style: 'percent',
+  }).format(percentage);
+}
+
 export function getErrorMessage(err: unknown) {
   // https://kentcdodds.com/blog/get-a-catch-block-error-message-with-typescript
   let message;

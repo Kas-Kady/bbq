@@ -27,6 +27,7 @@ export function getBBQ(slug: string) {
       upgrades: true,
       attendees: {
         include: {
+          user: true,
           chosenUpgrades: true,
         },
       },
@@ -38,6 +39,12 @@ export function getBBQsForUser(userId: string) {
   return prisma.bBQ.findMany({
     where: { attendees: { some: { userId } } },
     include: { upgrades: true },
+  });
+}
+
+export function getBBQsWithAttendeeCount() {
+  return prisma.bBQ.findMany({
+    include: { attendees: { select: { id: true } } },
   });
 }
 
@@ -242,4 +249,15 @@ async function getAttendee(bbqSlug: string, userId: string) {
   }
 
   return attendee;
+}
+
+export async function setDateForBBQ(slug: string, date: string) {
+  return prisma.bBQ.update({
+    where: { slug },
+    data: { date },
+    include: {
+      attendees: { include: { user: true, chosenUpgrades: true } },
+      upgrades: true,
+    },
+  });
 }
