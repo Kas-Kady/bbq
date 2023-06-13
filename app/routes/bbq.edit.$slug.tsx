@@ -1,7 +1,7 @@
 import type { LoaderArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import invariant from 'tiny-invariant';
-import { requireUserId } from '~/session.server';
+import { requireAdminUser } from '~/session.server';
 import { getBBQ } from '~/models/bbq.server';
 import { useLoaderData } from '@remix-run/react';
 import Navigation from '~/components/Navigation';
@@ -16,7 +16,7 @@ type Response = {
 };
 
 export async function loader({ request, params }: LoaderArgs) {
-  await requireUserId(request);
+  await requireAdminUser(request);
 
   const bbqSlug = params.slug;
 
@@ -40,7 +40,7 @@ export async function loader({ request, params }: LoaderArgs) {
 }
 
 export async function action({ request }: LoaderArgs) {
-  await requireUserId(request);
+  await requireAdminUser(request);
 }
 
 export default function EditBBQRoute() {

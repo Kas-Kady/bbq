@@ -19,7 +19,7 @@ export default function ProfileRoute() {
       <div className="flex h-full w-full flex-col sm:h-full sm:w-full sm:flex-row">
         <ProfileMenu />
 
-        <div className="mt-10 px-10">
+        <div className="mt-10 w-3/4 flex-none px-10">
           <Outlet />
         </div>
       </div>
