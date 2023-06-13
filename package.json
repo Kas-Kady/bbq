@@ -29,7 +29,9 @@
     "db:migrate": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "db:reset": "prisma migrate reset --force && prisma migrate deploy && prisma db seed",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "db:proxy:production": "fly proxy 15432:5432 -a bbq-4907-db",
+    "db:proxy:staging": "fly proxy 15432:5432 -a bbq-4907-staging-db"
   },
   "prettier": {
     "singleQuote": true,
