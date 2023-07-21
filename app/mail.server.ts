@@ -4,7 +4,10 @@ import type { User, Attendee, BBQ, Upgrade } from '@prisma/client';
 import { formatAmountToLocale, formatDateToLocale } from '~/utils';
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-const from = 'bbq@bbq.kaskady.nl';
+const from = {
+  name: 'BBQ @ Kas Kady',
+  email: 'bbq@bbq.kaskady.nl',
+};
 
 export function sendMail(to: string, subject: string, html: string) {
   return sgMail.send({
@@ -20,13 +23,11 @@ export function sendMailToAttendees(
 ) {
   let emails: sgMail.MailDataRequired[] = [];
   bbq.attendees.map((attendee) => {
-    let email = attendee.user.email;
-    if (!email.includes('lody')) {
-      email = 'hi@lodybo.nl';
-    }
-
     emails.push({
-      to: email,
+      to: {
+        name: attendee.user.name,
+        email: attendee.user.email,
+      },
       from,
       subject: `Bevestiging ${bbq.title}`,
       html: parseBBQConfirmationTemplate(bbq, attendee),
