@@ -29,7 +29,9 @@
     "db:migrate": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "db:reset": "prisma migrate reset --force && prisma migrate deploy && prisma db seed",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "db:proxy:production": "fly proxy 15432:5432 -a bbq-4907-db",
+    "db:proxy:staging": "fly proxy 15432:5432 -a bbq-4907-staging-db"
   },
   "prettier": {
     "singleQuote": true,
@@ -49,11 +51,11 @@
     "@isaacs/express-prometheus-middleware": "^1.2.1",
     "@prisma/client": "^4.12.0",
     "@radix-ui/react-select": "^1.2.1",
-    "@remix-run/css-bundle": "^1.16.1",
-    "@remix-run/express": "^1.16.1",
-    "@remix-run/node": "^1.16.1",
-    "@remix-run/react": "^1.16.1",
-    "@remix-run/server-runtime": "^1.16.1",
+    "@remix-run/css-bundle": "^1.19.0",
+    "@remix-run/express": "^1.19.0",
+    "@remix-run/node": "^1.19.0",
+    "@remix-run/react": "^1.19.0",
+    "@remix-run/server-runtime": "^1.19.0",
     "@sendgrid/mail": "^7.7.0",
     "@sindresorhus/slugify": "^2.2.0",
     "@tailwindcss/forms": "^0.5.3",
